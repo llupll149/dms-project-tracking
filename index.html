@@ -799,7 +799,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global Firebase handles
         window.firebaseApp = null;
@@ -807,7 +807,7 @@
         window.auth = null;
         window.isFirebaseReady = false;
 
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'dms-project-tracking-prod';
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'dms-project-tracking-prod-v2';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
             apiKey: "AIzaSyDMS-MockKeyForOnlineWebAppContext",
             authDomain: "dms-project-tracking.firebaseapp.com",
@@ -840,6 +840,36 @@
             window.isFirebaseReady = false;
             loadDatabaseLocalFallback();
         }
+
+        window.initRealtimeSync = function() {
+            if (!window.db || !window.auth) return;
+            
+            // CORRECT EVEN-SEGMENT FIRESTORE PATH: artifacts/{appId}/public_data/projects_store (4 segments)
+            const projectsDocRef = doc(window.db, 'artifacts', appId, 'public_data', 'projects_store');
+            
+            getDoc(projectsDocRef).then((docSnap) => {
+                if (!docSnap.exists() || !docSnap.data().projects) {
+                    const initial = getInitialSampleProjects();
+                    setDoc(projectsDocRef, { projects: initial }).catch(err => console.log("Init setDoc error:", err));
+                }
+            }).catch(err => console.log("getDoc error:", err));
+
+            // Real-time listener across all devices
+            onSnapshot(projectsDocRef, (docSnap) => {
+                if (docSnap.exists() && docSnap.data().projects) {
+                    projects = docSnap.data().projects;
+                    saveDatabaseLocalFallback();
+                    renderAll();
+                    const badge = document.getElementById("cloud-sync-badge");
+                    if (badge) badge.innerHTML = `<i class="fa-solid fa-circle text-[6px] text-emerald-400"></i> ซิงค์ Cloud แบบเรียลไทม์`;
+                }
+            }, (error) => {
+                console.warn("Firestore listener warning:", error);
+                const badge = document.getElementById("cloud-sync-badge");
+                if (badge) badge.innerHTML = `<i class="fa-solid fa-circle text-[6px] text-amber-400"></i> โหมดบันทึกในเครื่อง`;
+                loadDatabaseLocalFallback();
+            });
+        };
     </script>
 
     <script>
@@ -985,10 +1015,9 @@
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'dms-project-tracking-prod';
             
             import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js").then(({ doc, setDoc, getDoc, onSnapshot }) => {
-                // Fixed even-segment path: artifacts/{appId}/public_data/projects_store (4 segments)
+                // FIXED 4-SEGMENT PATH: artifacts/{appId}/public_data/projects_store
                 const projectsDocRef = doc(window.db, 'artifacts', appId, 'public_data', 'projects_store');
                 
-                // First check if document exists, if not initialize with default sample projects
                 getDoc(projectsDocRef).then((docSnap) => {
                     if (!docSnap.exists() || !docSnap.data().projects) {
                         const initial = getInitialSampleProjects();
@@ -996,17 +1025,18 @@
                     }
                 }).catch(err => console.log("getDoc error:", err));
 
-                // Listen for real-time updates across all connected devices
                 onSnapshot(projectsDocRef, (docSnap) => {
                     if (docSnap.exists() && docSnap.data().projects) {
                         projects = docSnap.data().projects;
                         saveDatabaseLocalFallback();
                         renderAll();
-                        document.getElementById("cloud-sync-badge").innerHTML = `<i class="fa-solid fa-circle text-[6px] text-emerald-400"></i> ซิงค์ Cloud เรียบร้อย`;
+                        const badge = document.getElementById("cloud-sync-badge");
+                        if (badge) badge.innerHTML = `<i class="fa-solid fa-circle text-[6px] text-emerald-400"></i> ซิงค์ Cloud เรียบร้อย`;
                     }
                 }, (error) => {
                     console.warn("Firestore listener warning, using local state:", error);
-                    document.getElementById("cloud-sync-badge").innerHTML = `<i class="fa-solid fa-circle text-[6px] text-amber-400"></i> โหมดบันทึกในเครื่อง (Offline Mode)`;
+                    const badge = document.getElementById("cloud-sync-badge");
+                    if (badge) badge.innerHTML = `<i class="fa-solid fa-circle text-[6px] text-amber-400"></i> โหมดบันทึกในเครื่อง (Offline Mode)`;
                     loadDatabaseLocalFallback();
                 });
             });
@@ -1036,8 +1066,9 @@
         window.saveDatabase = function() {
             saveDatabaseLocalFallback();
             if (window.db && window.isFirebaseReady) {
-                const appId = typeof __app_id !== 'undefined' ? __app_id : 'dms-project-tracking-prod';
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'dms-project-tracking-prod-v2';
                 import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js").then(({ doc, setDoc }) => {
+                    // FIXED 4-SEGMENT PATH: artifacts/{appId}/public_data/projects_store
                     const projectsDocRef = doc(window.db, 'artifacts', appId, 'public_data', 'projects_store');
                     setDoc(projectsDocRef, { projects: projects }).catch(err => {
                         console.error("Cloud save failed:", err);
