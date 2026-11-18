@@ -1,0 +1,1806 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMS Project Tracking - สำนักดิจิทัลการแพทย์</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Sarabun', 'Prompt', 'sans-serif'],
+                        display: ['Prompt', 'Sarabun', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        dms: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            500: '#0284c7',
+                            600: '#0369a1',
+                            700: '#075985',
+                            800: '#0c4a6e',
+                            900: '#082f49',
+                        },
+                        tealmed: {
+                            50: '#f0fdfa',
+                            100: '#ccfbf1',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+            background-color: #cbd5e1;
+            user-select: none;
+        }
+        h1, h2, h3, h4, .font-display {
+            font-family: 'Prompt', sans-serif;
+        }
+        ::-webkit-scrollbar {
+            width: 7px;
+            height: 7px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        .window-shadow {
+            box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(148, 163, 184, 0.4);
+        }
+        .selectable {
+            user-select: text;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade {
+            animation: fadeIn 0.22s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-0 sm:p-3 md:p-5 bg-gradient-to-br from-slate-300 via-sky-100 to-teal-100">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-10 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ==================== LOGIN SCREEN OVERLAY ==================== -->
+    <div id="login-screen" class="fixed inset-0 z-50 bg-gradient-to-br from-dms-900 via-dms-800 to-tealmed-800 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl border border-slate-200 overflow-hidden animate-fade">
+            <!-- Top Agency Banner -->
+            <div class="bg-gradient-to-r from-dms-900 to-tealmed-700 p-6 text-center text-white relative">
+                <div class="w-16 h-16 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center mx-auto mb-3 shadow-inner">
+                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-teal-300"></i>
+                </div>
+                <h2 class="font-display font-bold text-lg tracking-wide">DMS Project Tracking Online</h2>
+                <p class="text-xs text-sky-100 mt-1">ระบบบริหารและติดตามโครงการออนไลน์ • สำนักดิจิทัลการแพทย์</p>
+                <span class="inline-block mt-2.5 px-2.5 py-0.5 rounded-full bg-white/15 text-[10px] text-emerald-200 border border-emerald-300/30">
+                    <i class="fa-solid fa-circle text-[8px] mr-1 text-emerald-400"></i> Cloud Real-Time Database Enabled
+                </span>
+            </div>
+
+            <!-- Login Form -->
+            <form onsubmit="handleLogin(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อผู้ใช้งาน (Username)</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user-shield absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input type="text" id="login-username" required value="admin" placeholder="ระบุชื่อผู้ใช้งาน" class="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:bg-white focus:border-dms-500">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-semibold text-slate-700">รหัสผ่าน (Password)</label>
+                        <button type="button" onclick="toggleLoginPassword()" class="text-[11px] text-dms-600 hover:underline">แสดง/ซ่อนรหัสผ่าน</button>
+                    </div>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                        <input type="password" id="login-password" required value="1234" placeholder="ระบุรหัสผ่าน" class="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:bg-white focus:border-dms-500">
+                    </div>
+                </div>
+
+                <div id="login-error-msg" class="hidden p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <span>ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง</span>
+                </div>
+
+                <button type="submit" class="w-full py-2.5 px-4 bg-gradient-to-r from-dms-700 to-tealmed-600 hover:from-dms-800 hover:to-tealmed-700 text-white rounded-xl text-sm font-display font-semibold shadow-md transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบออนไลน์
+                </button>
+
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                    <span>ค่าเริ่มต้น: <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 font-mono">admin</code> / <code class="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 font-mono">1234</code></span>
+                    <button type="button" onclick="openChangePasswordModal()" class="text-dms-600 hover:underline font-medium">ตั้งค่ารหัสผ่าน</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Web App Window Frame -->
+    <div id="main-app-window" class="hidden w-full max-w-[1440px] h-screen sm:h-[92vh] bg-slate-50 sm:rounded-xl window-shadow flex-col overflow-hidden border border-slate-300">
+        
+        <!-- App Title Bar -->
+        <header class="bg-gradient-to-r from-dms-900 via-dms-800 to-tealmed-700 text-white h-10 px-3 flex items-center justify-between shrink-0 border-b border-dms-900">
+            <div class="flex items-center gap-2.5">
+                <div class="w-6 h-6 rounded bg-white/15 flex items-center justify-center text-teal-300 border border-white/20">
+                    <i class="fa-solid fa-cloud text-xs"></i>
+                </div>
+                <div class="flex items-center gap-2 text-xs sm:text-sm">
+                    <span class="font-display font-semibold tracking-wide">DMS Project Tracking Online v2.0</span>
+                    <span class="hidden md:inline text-sky-200/80">|</span>
+                    <span class="hidden md:inline text-sky-100/90 text-xs">ระบบบริหารและติดตามโครงการออนไลน์ • สำนักดิจิทัลการแพทย์ กรมการแพทย์</span>
+                </div>
+                <span id="cloud-sync-badge" class="ml-2 px-2 py-0.5 text-[10px] font-medium bg-emerald-400/20 text-emerald-200 border border-emerald-300/30 rounded-full flex items-center gap-1">
+                    <i class="fa-solid fa-circle text-[6px] text-emerald-400 animate-pulse"></i> เชื่อมต่อ Cloud แล้ว
+                </span>
+            </div>
+            <div class="flex items-center gap-1">
+                <button onclick="toggleFullScreen()" class="w-8 h-7 hover:bg-white/10 rounded flex items-center justify-center text-slate-200 transition" title="Fullscreen">
+                    <i class="fa-regular fa-square text-xs"></i>
+                </button>
+                <button onclick="logoutSystem()" class="w-8 h-7 hover:bg-rose-600 rounded flex items-center justify-center text-slate-200 hover:text-white transition" title="ออกจากระบบ">
+                    <i class="fa-solid fa-power-off text-sm"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Workspace Container -->
+        <div class="flex flex-1 overflow-hidden">
+            
+            <!-- Left Navigation Sidebar -->
+            <aside class="w-16 md:w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0">
+                <div>
+                    <!-- Agency Header Badge -->
+                    <div class="p-3 md:p-4 border-b border-slate-100 bg-gradient-to-b from-sky-50/70 to-white">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-dms-600 to-tealmed-600 text-white flex items-center justify-center shadow-sm shrink-0">
+                                <i class="fa-solid fa-network-wired text-lg"></i>
+                            </div>
+                            <div class="hidden md:block overflow-hidden">
+                                <div class="font-display font-bold text-dms-900 text-sm truncate">สำนักดิจิทัลการแพทย์</div>
+                                <div class="text-xs text-tealmed-700 font-medium truncate">กรมการแพทย์ กระทรวงสาธารณสุข</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Menu -->
+                    <nav class="p-2 space-y-1 mt-1" id="sidebar-nav">
+                        <button onclick="switchTab('dashboard')" data-tab="dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all bg-dms-50 text-dms-700 border border-dms-200/80 shadow-sm">
+                            <i class="fa-solid fa-chart-pie w-5 text-center text-dms-600"></i>
+                            <span class="hidden md:inline font-display">ภาพรวม (Dashboard)</span>
+                        </button>
+                        <button onclick="switchTab('registry')" data-tab="registry" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-all">
+                            <i class="fa-solid fa-folder-open w-5 text-center text-slate-500"></i>
+                            <span class="hidden md:inline font-display">ทะเบียนโครงการ</span>
+                            <span id="nav-count-badge" class="hidden md:inline-flex ml-auto px-2 py-0.5 text-xs rounded-full bg-slate-100 text-slate-600 font-semibold">0</span>
+                        </button>
+                        <button onclick="openNewProjectModal()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-tealmed-700 hover:bg-tealmed-50 transition-all">
+                            <i class="fa-solid fa-circle-plus w-5 text-center text-tealmed-600"></i>
+                            <span class="hidden md:inline font-display">ลงทะเบียนโครงการใหม่</span>
+                        </button>
+                        <button onclick="switchTab('audit')" data-tab="audit" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-all">
+                            <i class="fa-solid fa-clock-rotate-left w-5 text-center text-slate-500"></i>
+                            <span class="hidden md:inline font-display">ประวัติการดำเนินงาน</span>
+                        </button>
+                        <button onclick="switchTab('backup')" data-tab="backup" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-all">
+                            <i class="fa-solid fa-database w-5 text-center text-slate-500"></i>
+                            <span class="hidden md:inline font-display">ส่งออก Excel & สำรองข้อมูล</span>
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Operator Profile & Quick Export -->
+                <div class="p-3 border-t border-slate-200 bg-slate-50/80">
+                    <div class="hidden md:block mb-2.5">
+                        <label class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">ผู้ปฏิบัติงานออนไลน์</label>
+                        <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5">
+                            <i class="fa-solid fa-user-tie text-dms-600 text-xs"></i>
+                            <input type="text" id="operator-name" value="นักวิชาการคอมพิวเตอร์ปฏิบัติการ" onchange="saveOperatorName(this.value)" class="w-full text-xs text-slate-700 font-medium focus:outline-none bg-transparent">
+                        </div>
+                    </div>
+                    <button onclick="exportToCSV()" class="w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-display font-medium flex items-center justify-center gap-2 shadow-sm transition">
+                        <i class="fa-solid fa-file-excel"></i>
+                        <span class="hidden md:inline">ส่งออก Excel (CSV)</span>
+                    </button>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-1.5 mt-2">
+                        <button onclick="openChangePasswordModal()" class="py-1.5 px-2 bg-slate-200/80 hover:bg-slate-300/80 text-slate-700 rounded-lg text-[11px] font-display font-medium flex items-center justify-center gap-1 transition">
+                            <i class="fa-solid fa-key text-[10px]"></i>
+                            <span class="hidden md:inline">รหัสผ่าน</span>
+                        </button>
+                        <button onclick="logoutSystem()" class="py-1.5 px-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-[11px] font-display font-medium flex items-center justify-center gap-1 transition">
+                            <i class="fa-solid fa-right-from-bracket text-[10px]"></i>
+                            <span class="hidden md:inline">ออกจากระบบ</span>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 overflow-y-auto bg-slate-50/70 p-4 md:p-6" id="main-scroll">
+                
+                <!-- ==================== TAB 1: DASHBOARD ==================== -->
+                <section id="tab-dashboard" class="tab-content animate-fade space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200/90 shadow-sm">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="px-2.5 py-0.5 rounded-md bg-dms-100 text-dms-800 text-xs font-semibold">ระบบติดตามโครงการออนไลน์ 6 ขั้นตอน</span>
+                                <span class="text-xs text-emerald-600 font-medium"><i class="fa-solid fa-cloud mr-1"></i>ซิงค์ข้อมูลแบบเรียลไทม์ผ่านคลาวด์</span>
+                            </div>
+                            <h1 class="text-xl md:text-2xl font-bold text-slate-800 mt-1">สรุปภาพรวมการบริหารและติดตามโครงการ</h1>
+                            <p class="text-sm text-slate-500">สำนักดิจิทัลการแพทย์ กรมการแพทย์ • ติดตามสถานะการรับเรื่อง ประชุมพิจารณา เสนอลงนาม และส่งคืนหน่วยงาน</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <select id="dash-fiscal-filter" onchange="renderDashboard()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 font-medium focus:outline-none focus:border-dms-500">
+                                <option value="ALL">ทุกปีงบประมาณ</option>
+                                <option value="2569">ปีงบประมาณ 2569</option>
+                                <option value="2568">ปีงบประมาณ 2568</option>
+                            </select>
+                            <button onclick="openNewProjectModal()" class="px-4 py-2 bg-dms-600 hover:bg-dms-700 text-white rounded-lg text-sm font-display font-medium flex items-center gap-2 shadow-sm transition">
+                                <i class="fa-solid fa-plus"></i> รับเรื่องโครงการใหม่
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Summary KPI Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-slate-500">โครงการทั้งหมดในระบบ</p>
+                                <h3 id="kpi-total" class="text-3xl font-bold text-slate-800 mt-1">0</h3>
+                                <p class="text-xs text-dms-600 mt-1 font-medium"><i class="fa-solid fa-folder mr-1"></i>ทะเบียนรับเรื่องทั้งหมด</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-dms-50 text-dms-600 flex items-center justify-center text-xl border border-dms-100">
+                                <i class="fa-solid fa-layer-group"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-slate-500">กำลังดำเนินการ (ขั้นที่ 1-4)</p>
+                                <h3 id="kpi-inprogress" class="text-3xl font-bold text-amber-600 mt-1">0</h3>
+                                <p class="text-xs text-amber-600 mt-1 font-medium"><i class="fa-solid fa-spinner mr-1"></i>อยู่ระหว่างประชุม/เสนอเซ็น</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl border border-amber-100">
+                                <i class="fa-solid fa-clipboard-list"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-slate-500">อนุมัติ / ส่งคืนแล้ว (ขั้นที่ 5-6)</p>
+                                <h3 id="kpi-completed" class="text-3xl font-bold text-tealmed-600 mt-1">0</h3>
+                                <p class="text-xs text-tealmed-600 mt-1 font-medium"><i class="fa-solid fa-circle-check mr-1"></i>ลงนามอนุมัติและส่งคืนแล้ว</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-tealmed-50 text-tealmed-600 flex items-center justify-center text-xl border border-tealmed-100">
+                                <i class="fa-solid fa-file-signature"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-slate-500">ไม่ผ่าน / ยกเลิกโครงการ</p>
+                                <h3 id="kpi-rejected" class="text-3xl font-bold text-rose-600 mt-1">0</h3>
+                                <p class="text-xs text-rose-600 mt-1 font-medium"><i class="fa-solid fa-ban mr-1"></i>ยุติการดำเนินการพร้อมเหตุผล</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-xl border border-rose-100">
+                                <i class="fa-solid fa-circle-xmark"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6-Step Workflow Distribution & Recent Projects -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div class="lg:col-span-7 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 class="font-bold text-slate-800 text-base">จำนวนโครงการแยกตามสถานะ 6 ขั้นตอน</h3>
+                                    <p class="text-xs text-slate-500">คลิกที่แถบขั้นตอนเพื่อกรองดูโครงการในขั้นตอนนั้น</p>
+                                </div>
+                                <span class="text-xs font-medium px-2.5 py-1 rounded-full bg-slate-100 text-slate-600">6-Step Workflow</span>
+                            </div>
+                            <div id="step-chart-container" class="space-y-3"></div>
+                        </div>
+
+                        <div class="lg:col-span-5 flex flex-col gap-6">
+                            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex-1">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="font-bold text-slate-800 text-base">
+                                        <i class="fa-solid fa-bell text-amber-500 mr-1.5"></i>โครงการรอติดตามเร่งด่วน
+                                    </h3>
+                                    <button onclick="switchTab('registry')" class="text-xs text-dms-600 hover:underline font-medium">ดูทั้งหมด</button>
+                                </div>
+                                <div id="urgent-projects-list" class="space-y-2.5"></div>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="font-bold text-slate-800 text-base">
+                                        <i class="fa-solid fa-clock-rotate-left text-dms-600 mr-1.5"></i>ความเคลื่อนไหวล่าสุด
+                                    </h3>
+                                    <button onclick="switchTab('audit')" class="text-xs text-dms-600 hover:underline font-medium">ประวัติทั้งหมด</button>
+                                </div>
+                                <div id="dashboard-recent-logs" class="space-y-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== TAB 2: PROJECT REGISTRY ==================== -->
+                <section id="tab-registry" class="tab-content hidden animate-fade space-y-4">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                            <div>
+                                <h2 class="text-lg font-bold text-slate-800">ทะเบียนโครงการสำนักดิจิทัลการแพทย์</h2>
+                                <p class="text-xs text-slate-500">จัดการสถานะ 6 ขั้นตอน บันทึกวันที่รับเรื่อง ประชุมพิจารณา เสนอเซ็น ลงนาม และส่งคืนหน่วยงาน</p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button onclick="exportToCSV()" class="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-display font-semibold flex items-center gap-1.5 transition">
+                                    <i class="fa-solid fa-file-csv text-sm"></i> ส่งออก Excel
+                                </button>
+                                <button onclick="openNewProjectModal()" class="px-4 py-2 bg-dms-600 hover:bg-dms-700 text-white rounded-lg text-xs font-display font-semibold flex items-center gap-1.5 shadow-sm transition">
+                                    <i class="fa-solid fa-plus"></i> เพิ่มโครงการใหม่
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 pt-2 border-t border-slate-100">
+                            <div class="lg:col-span-4 relative">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                <input type="text" id="search-input" oninput="renderProjectTable()" placeholder="ค้นหาเลขทะเบียนรับ, ชื่อโครงการ, หน่วยงาน..." class="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:bg-white focus:border-dms-500">
+                            </div>
+                            <div class="lg:col-span-3 relative">
+                                <div class="flex items-center bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 focus-within:bg-white focus-within:border-dms-500">
+                                    <span class="text-[11px] text-slate-500 whitespace-nowrap mr-1.5"><i class="fa-regular fa-calendar-check text-dms-600 mr-1"></i>วันประชุม:</span>
+                                    <input type="date" id="meeting-date-filter" onchange="renderProjectTable()" class="w-full text-xs text-slate-700 bg-transparent focus:outline-none" title="ค้นหาตามวันที่ประชุมพิจารณา">
+                                </div>
+                            </div>
+                            <div class="lg:col-span-3">
+                                <select id="status-filter" onchange="renderProjectTable()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:border-dms-500">
+                                    <option value="ALL">ทุกสถานะ (6 ขั้นตอน + ไม่ผ่าน/ยกเลิก)</option>
+                                    <option value="ACTIVE">เฉพาะกำลังดำเนินการ (ขั้นที่ 1 - 4)</option>
+                                    <option value="1">1. รับเรื่องเข้า</option>
+                                    <option value="2">2. ประชุมพิจารณา</option>
+                                    <option value="3">3. ส่งเอกสารเพื่อดำเนินการเสนอพิจารณาลงนาม</option>
+                                    <option value="4">4. เสนอผู้บริหารพิจารณาลงนาม (บันทึกวันที่เสนอเซ็น)</option>
+                                    <option value="5">5. ผู้บริหารลงนามอนุมัติ</option>
+                                    <option value="6">6. แจ้งผลพิจารณาและส่งคืนหน่วยงาน</option>
+                                    <option value="REJECTED">สถานะพิเศษ: ไม่ผ่านการพิจารณา / ยกเลิก</option>
+                                </select>
+                            </div>
+                            <div class="lg:col-span-1">
+                                <select id="year-filter" onchange="renderProjectTable()" class="w-full px-2 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 focus:outline-none focus:border-dms-500">
+                                    <option value="ALL">ทุกปีฯ</option>
+                                    <option value="2569">2569</option>
+                                    <option value="2568">2568</option>
+                                </select>
+                            </div>
+                            <div class="lg:col-span-1">
+                                <button onclick="resetFilters()" class="w-full py-2 px-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-medium transition" title="ล้างตัวกรอง">
+                                    ล้างค่า
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Table Container -->
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-100/90 border-b border-slate-200 text-slate-600 text-xs font-display uppercase tracking-wider">
+                                        <th class="py-3 px-4">เลขทะเบียนรับ / ปีงบฯ</th>
+                                        <th class="py-3 px-4 min-w-[240px]">ชื่อโครงการ / ประเภทงบฯ & เกณฑ์</th>
+                                        <th class="py-3 px-4">วันที่รับเรื่อง</th>
+                                        <th class="py-3 px-4 min-w-[230px]">สถานะปัจจุบัน (6 ขั้นตอน) & วันประชุม</th>
+                                        <th class="py-3 px-4">วันที่สำคัญ (เสนอเซ็น/ลงนาม/ส่งคืน)</th>
+                                        <th class="py-3 px-4 text-right">จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="project-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                        <div id="empty-table-state" class="hidden py-12 text-center">
+                            <div class="w-14 h-14 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3 text-xl">
+                                <i class="fa-solid fa-folder-open"></i>
+                            </div>
+                            <p class="text-slate-600 font-medium">ไม่พบข้อมูลโครงการที่ตรงกับเงื่อนไขการค้นหา</p>
+                            <button onclick="resetFilters()" class="mt-2 text-xs text-dms-600 hover:underline">แสดงโครงการทั้งหมด</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== TAB 3: AUDIT LOG / HISTORY ==================== -->
+                <section id="tab-audit" class="tab-content hidden animate-fade space-y-4">
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800">ประวัติการดำเนินงานย้อนหลัง (Audit Log)</h2>
+                            <p class="text-xs text-slate-500">บันทึกทุกการเปลี่ยนแปลงสถานะ วันที่เสนอเซ็น วันที่ลงนาม วันที่ส่งคืน และเหตุผลการยกเลิก</p>
+                        </div>
+                        <div class="relative w-full md:w-72">
+                            <i class="fa-solid fa-search absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                            <input type="text" id="audit-search" oninput="renderGlobalAuditLog()" placeholder="ค้นหาประวัติตามชื่อโครงการ..." class="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <div id="global-audit-list" class="space-y-4"></div>
+                    </div>
+                </section>
+
+                <!-- ==================== TAB 4: BACKUP & EXPORT ==================== -->
+                <section id="tab-backup" class="tab-content hidden animate-fade space-y-5">
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <h2 class="text-lg font-bold text-slate-800">จัดการข้อมูลบน Cloud และการส่งออกรายงาน</h2>
+                        <p class="text-sm text-slate-500 mt-1">ระบบออนไลน์บน Cloud ซิงค์อัตโนมัติระหว่างผู้ใช้งานทุกคนทันที สามารถส่งออกไฟล์ Excel หรือสำรองฐานข้อมูลเป็น JSON ได้ตลอดเวลา</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl mb-4 border border-emerald-100">
+                                    <i class="fa-solid fa-file-excel"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-base">ส่งออกรายงาน Excel (.CSV)</h3>
+                                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                                    ส่งออกทะเบียนโครงการทั้งหมด พร้อมประเภทงบประมาณ ประเภทโครงการ สถานะ 6 ขั้นตอน วันที่รับเรื่อง วันที่ประชุมพิจารณา วันที่เสนอเซ็น วันที่ลงนาม และวันที่ส่งคืน เข้ารหัส <strong>UTF-8 BOM</strong>
+                                </p>
+                            </div>
+                            <button onclick="exportToCSV()" class="mt-6 w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-display font-medium flex items-center justify-center gap-2 shadow-sm transition">
+                                <i class="fa-solid fa-download"></i> ดาวน์โหลดไฟล์ Excel (.csv)
+                            </button>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                            <div>
+                                <div class="w-12 h-12 rounded-xl bg-dms-50 text-dms-600 flex items-center justify-center text-2xl mb-4 border border-dms-100">
+                                    <i class="fa-solid fa-cloud-arrow-down"></i>
+                                </div>
+                                <h3 class="font-bold text-slate-800 text-base">สำรองฐานข้อมูล Cloud (JSON Backup)</h3>
+                                <p class="text-xs text-slate-500 mt-2 leading-relaxed">
+                                    ดาวน์โหลดข้อมูลโครงการทั้งหมดจาก Cloud เก็บไว้เป็นไฟล์สำรองส่วนตัวในเครื่องคอมพิวเตอร์เพื่อความปลอดภัยสูงสุด
+                                </p>
+                            </div>
+                            <button onclick="backupDatabase()" class="mt-6 w-full py-2.5 px-4 bg-dms-600 hover:bg-dms-700 text-white rounded-lg text-sm font-display font-medium flex items-center justify-center gap-2 shadow-sm transition">
+                                <i class="fa-solid fa-floppy-disk"></i> ดาวน์โหลดไฟล์สำรองข้อมูล
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+
+        <!-- App Bottom Status Bar -->
+        <footer class="bg-slate-200/90 border-t border-slate-300 h-7 px-3 flex items-center justify-between text-[11px] text-slate-600 shrink-0">
+            <div class="flex items-center gap-3">
+                <span class="flex items-center gap-1.5 font-medium text-emerald-700">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block animate-ping"></span>
+                    ระบบออนไลน์ Cloud Database (Connected)
+                </span>
+                <span class="hidden sm:inline text-slate-400">|</span>
+                <span id="status-bar-count" class="hidden sm:inline">โครงการทั้งหมด: 0 รายการ</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <span id="status-bar-operator" class="hidden md:inline">ผู้ปฏิบัติงาน: นักวิชาการคอมพิวเตอร์ปฏิบัติการ</span>
+                <span class="text-slate-400">|</span>
+                <span id="status-bar-clock" class="font-mono"></span>
+            </div>
+        </footer>
+    </div>
+
+    <!-- ==================== MODAL 1: ADD / EDIT PROJECT ==================== -->
+    <div id="project-form-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 hidden items-center justify-center p-3 sm:p-4">
+        <div class="bg-white w-full max-w-2xl rounded-xl shadow-2xl border border-slate-200 overflow-hidden animate-fade max-h-[92vh] flex flex-col">
+            <div class="bg-dms-800 text-white px-5 py-3.5 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-folder-plus text-teal-300"></i>
+                    <h3 id="form-modal-title" class="font-display font-semibold text-base">ลงทะเบียนรับเรื่องโครงการใหม่</h3>
+                </div>
+                <button onclick="closeProjectFormModal()" class="text-slate-300 hover:text-white transition">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form id="project-form" onsubmit="handleProjectFormSubmit(event)" class="p-5 overflow-y-auto space-y-4">
+                <input type="hidden" id="edit-project-id">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">เลขทะเบียนรับ (ดดปปxxx) <span class="text-rose-500">*</span></label>
+                        <input type="text" id="field-code" required placeholder="เช่น 1169001" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono font-semibold text-dms-800 focus:outline-none focus:border-dms-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">ปีงบประมาณ <span class="text-rose-500">*</span></label>
+                        <select id="field-year" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                            <option value="2569">2569</option>
+                            <option value="2568">2568</option>
+                            <option value="2570">2570</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">วันที่รับเรื่องเข้าสำนักฯ <span class="text-rose-500">*</span></label>
+                        <input type="date" id="field-received-date" required onchange="autoGenerateRegCode()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อโครงการ <span class="text-rose-500">*</span></label>
+                    <input type="text" id="field-name" required placeholder="ระบุชื่อโครงการระบบดิจิทัลการแพทย์ / เทคโนโลยีสารสนเทศ..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">หน่วยงานเจ้าของโครงการ <span class="text-rose-500">*</span></label>
+                        <input type="text" id="field-agency" required placeholder="เช่น สถาบันสุขภาพเด็กแห่งชาติมหาราชินี" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">งบประมาณโครงการ (บาท)</label>
+                        <input type="number" id="field-budget" placeholder="0" min="0" step="0.01" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">ประเภทของงบประมาณ <span class="text-rose-500">*</span></label>
+                        <select id="field-budget-type" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                            <option value="งบลงทุน (ครุภัณฑ์/สิ่งก่อสร้าง)">งบลงทุน (ครุภัณฑ์/สิ่งก่อสร้าง)</option>
+                            <option value="งบดำเนินงาน">งบดำเนินงาน</option>
+                            <option value="งบอุดหนุน">งบอุดหนุน</option>
+                            <option value="งบรายจ่ายอื่น">งบรายจ่ายอื่น</option>
+                            <option value="เงินบำรุงโรงพยาบาล">เงินบำรุงโรงพยาบาล</option>
+                            <option value="งบกลาง / งบพิเศษอื่นๆ">งบกลาง / งบพิเศษอื่นๆ</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">ประเภทโครงการ (เกณฑ์พิจารณา) <span class="text-rose-500">*</span></label>
+                        <select id="field-criteria-type" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                            <option value="ตรงเกณฑ์">ตรงเกณฑ์</option>
+                            <option value="ไม่ตรงเกณฑ์">ไม่ตรงเกณฑ์</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">เลขที่หนังสือรับ / อ้างอิง</label>
+                        <input type="text" id="field-doc-no" placeholder="เช่น สธ 0310/..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">รายละเอียด / หมายเหตุเบื้องต้น</label>
+                    <textarea id="field-note" rows="2" placeholder="ระบุขอบเขตงานหรือหมายเหตุเพิ่มเติม..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500"></textarea>
+                </div>
+
+                <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
+                    <button type="button" onclick="closeProjectFormModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 bg-dms-600 hover:bg-dms-700 text-white rounded-lg text-sm font-display font-medium shadow-sm transition">
+                        <i class="fa-solid fa-save mr-1.5"></i> บันทึกข้อมูลขึ้น Cloud
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 2: PROJECT WORKFLOW & DETAILS ==================== -->
+    <div id="project-detail-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-40 hidden items-center justify-center p-2 sm:p-4">
+        <div class="bg-white w-full max-w-5xl rounded-xl shadow-2xl border border-slate-200 overflow-hidden animate-fade max-h-[94vh] flex flex-col">
+            <div class="bg-gradient-to-r from-dms-900 to-dms-700 text-white px-5 py-3.5 flex items-center justify-between shrink-0">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <span id="detail-code-badge" class="px-2.5 py-1 rounded bg-white/15 text-teal-200 font-mono text-xs font-bold shrink-0">1169001</span>
+                    <h3 id="detail-project-title" class="font-display font-semibold text-sm sm:text-base truncate">ชื่อโครงการ</h3>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button onclick="openEditFromDetail()" class="px-3 py-1 bg-white/15 hover:bg-white/25 rounded text-xs font-medium transition">
+                        <i class="fa-solid fa-pen-to-square mr-1"></i> แก้ไขข้อมูลหลัก
+                    </button>
+                    <button onclick="closeDetailModal()" class="text-slate-300 hover:text-white ml-1 transition">
+                        <i class="fa-solid fa-xmark text-xl"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 bg-slate-50/60">
+                <div class="lg:col-span-7 space-y-5">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs space-y-3">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
+                            <div>
+                                <span class="text-slate-400 block">หน่วยงานเจ้าของเรื่อง</span>
+                                <span id="detail-agency" class="font-semibold text-slate-800"></span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block">งบประมาณ / ประเภทงบฯ</span>
+                                <span id="detail-budget" class="font-semibold text-slate-800"></span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block">ประเภทโครงการ (เกณฑ์)</span>
+                                <span id="detail-criteria-type" class="font-semibold"></span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block">วันที่รับเรื่องเข้าสำนักฯ</span>
+                                <span id="detail-received-date" class="font-semibold text-slate-800"></span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block">วันที่ประชุมพิจารณา (ขั้นที่ 2)</span>
+                                <span id="detail-meeting-date" class="font-semibold text-blue-700">-</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block">วันที่เสนอเซ็น (ขั้นที่ 4)</span>
+                                <span id="detail-submitted-sign-date" class="font-semibold text-indigo-700">-</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block">วันที่ลงนาม (ขั้นที่ 5)</span>
+                                <span id="detail-signed-date" class="font-semibold text-tealmed-700">-</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block">วันที่ส่งคืนหน่วยงาน (ขั้นที่ 6)</span>
+                                <span id="detail-returned-date" class="font-semibold text-emerald-700">-</span>
+                            </div>
+                            <div>
+                                <span class="text-slate-400 block">เลขที่หนังสือรับ / หมายเหตุ</span>
+                                <span id="detail-doc-note" class="text-slate-700">-</span>
+                            </div>
+                        </div>
+
+                        <div id="detail-rejection-box" class="hidden p-3 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs">
+                            <div class="font-bold flex items-center gap-1.5">
+                                <i class="fa-solid fa-triangle-exclamation"></i> สถานะ: ไม่ผ่านการพิจารณา / ยกเลิกโครงการ
+                            </div>
+                            <p id="detail-rejection-reason" class="mt-1"></p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-4 sm:p-5 rounded-xl border border-dms-200 shadow-xs space-y-4">
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                            <h4 class="font-bold text-dms-900 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-stairs text-dms-600"></i> ปรับปรุงสถานะการดำเนินงาน (6 ขั้นตอน)
+                            </h4>
+                            <span id="detail-current-step-badge" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-dms-100 text-dms-800"></span>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">เลือกขั้นตอน / สถานะใหม่ <span class="text-rose-500">*</span></label>
+                                <select id="update-step-select" onchange="toggleWorkflowDateFields()" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium text-slate-800 focus:outline-none focus:border-dms-500 bg-slate-50">
+                                    <option value="1">1. รับเรื่องเข้า</option>
+                                    <option value="2">2. ประชุมพิจารณา (บันทึกวันที่ประชุมพิจารณา)</option>
+                                    <option value="3">3. ส่งเอกสารเพื่อดำเนินการเสนอพิจารณาลงนาม</option>
+                                    <option value="4">4. เสนอผู้บริหารพิจารณาลงนาม (บันทึกวันที่เสนอเซ็น)</option>
+                                    <option value="5">5. ผู้บริหารลงนามอนุมัติ (บันทึกวันที่ลงนาม)</option>
+                                    <option value="6">6. แจ้งผลพิจารณาและส่งคืนหน่วยงาน (บันทึกวันที่ส่งคืน)</option>
+                                    <option value="REJECTED">❌ สถานะพิเศษ: ไม่ผ่านการพิจารณา / ยกเลิกโครงการ</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">วันที่เปลี่ยนสถานะ / ดำเนินการ <span class="text-rose-500">*</span></label>
+                                <input type="date" id="update-status-date" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                            </div>
+
+                            <div id="box-meeting-date" class="hidden">
+                                <label class="block text-xs font-semibold text-blue-700 mb-1">วันที่ประชุมพิจารณา <span class="text-rose-500">*</span></label>
+                                <input type="date" id="update-meeting-date" class="w-full px-3 py-2 border border-blue-300 bg-blue-50/40 rounded-lg text-sm focus:outline-none focus:border-blue-500">
+                            </div>
+
+                            <div id="box-submitted-sign-date" class="hidden">
+                                <label class="block text-xs font-semibold text-indigo-700 mb-1">วันที่เสนอเซ็น <span class="text-rose-500">*</span></label>
+                                <input type="date" id="update-submitted-sign-date" class="w-full px-3 py-2 border border-indigo-300 bg-indigo-50/40 rounded-lg text-sm focus:outline-none focus:border-indigo-500">
+                            </div>
+
+                            <div id="box-signed-date" class="hidden">
+                                <label class="block text-xs font-semibold text-tealmed-700 mb-1">วันที่ผู้บริหารลงนาม <span class="text-rose-500">*</span></label>
+                                <input type="date" id="update-signed-date" class="w-full px-3 py-2 border border-tealmed-300 bg-tealmed-50/40 rounded-lg text-sm focus:outline-none focus:border-tealmed-500">
+                            </div>
+
+                            <div id="box-returned-date" class="hidden">
+                                <label class="block text-xs font-semibold text-emerald-700 mb-1">วันที่ส่งคืนหน่วยงาน <span class="text-rose-500">*</span></label>
+                                <input type="date" id="update-returned-date" class="w-full px-3 py-2 border border-emerald-300 bg-emerald-50/40 rounded-lg text-sm focus:outline-none focus:border-emerald-500">
+                            </div>
+
+                            <div id="box-rejection-reason" class="hidden sm:col-span-2">
+                                <label class="block text-xs font-semibold text-rose-700 mb-1">เหตุผลที่ไม่ผ่านการพิจารณา / ยกเลิกโครงการ <span class="text-rose-500">*</span></label>
+                                <textarea id="update-rejection-reason" rows="2" placeholder="ระบุเหตุผล..." class="w-full px-3 py-2 border border-rose-300 bg-rose-50/40 rounded-lg text-sm focus:outline-none focus:border-rose-500"></textarea>
+                            </div>
+
+                            <div class="sm:col-span-2">
+                                <label class="block text-xs font-semibold text-slate-700 mb-1">บันทึกผลการดำเนินงาน / หมายเหตุในขั้นตอนนี้</label>
+                                <input type="text" id="update-remark" placeholder="เช่น ตรวจสอบเอกสารครบถ้วน..." class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between pt-2">
+                            <button type="button" onclick="deleteCurrentProject()" class="text-xs text-rose-600 hover:text-rose-800 font-medium flex items-center gap-1">
+                                <i class="fa-solid fa-trash-can"></i> ลบโครงการนี้
+                            </button>
+                            <button type="button" onclick="saveWorkflowUpdate()" class="px-5 py-2 bg-dms-600 hover:bg-dms-700 text-white rounded-lg text-sm font-display font-medium shadow-sm transition flex items-center gap-2">
+                                <i class="fa-solid fa-check-circle"></i> บันทึกความคืบหน้าขึ้น Cloud
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 flex flex-col gap-4">
+                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex-1 flex flex-col">
+                        <h4 class="font-bold text-slate-800 text-sm mb-3 flex items-center justify-between">
+                            <span><i class="fa-solid fa-timeline text-tealmed-600 mr-1.5"></i>ประวัติการดำเนินงานย้อนหลัง</span>
+                            <span id="detail-log-count" class="text-xs font-normal text-slate-400">0 รายการ</span>
+                        </h4>
+                        <div id="detail-timeline-container" class="space-y-3 overflow-y-auto max-h-[430px] pr-1"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Confirmation Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-slate-900/60 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-xl p-5 shadow-2xl border border-slate-200 animate-fade">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h4 id="confirm-title" class="font-bold text-slate-800 text-base">ยืนยันการทำรายการ</h4>
+                    <p id="confirm-message" class="text-sm text-slate-600 mt-1"></p>
+                </div>
+            </div>
+            <div class="mt-5 flex justify-end gap-2">
+                <button onclick="closeConfirmModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">ยกเลิก</button>
+                <button id="confirm-action-btn" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-semibold">ยืนยัน</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="change-password-modal" class="fixed inset-0 bg-slate-900/60 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-xl shadow-2xl border border-slate-200 overflow-hidden animate-fade">
+            <div class="bg-dms-800 text-white px-4 py-3 flex items-center justify-between">
+                <h4 class="font-display font-semibold text-sm"><i class="fa-solid fa-key text-teal-300 mr-1.5"></i>ตั้งค่าบัญชีและรหัสผ่านเข้าใช้งาน</h4>
+                <button onclick="closeChangePasswordModal()" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="handleChangePassword(event)" class="p-4 space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อผู้ใช้งาน (Username)</label>
+                    <input type="text" id="cfg-username" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">รหัสผ่านเดิม</label>
+                    <input type="password" id="cfg-old-pass" required placeholder="ระบุรหัสผ่านเดิม (เริ่มต้น 1234)" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">รหัสผ่านใหม่</label>
+                    <input type="password" id="cfg-new-pass" required placeholder="ระบุรหัสผ่านใหม่" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeChangePasswordModal()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-1.5 bg-dms-600 hover:bg-dms-700 text-white rounded-lg text-xs font-semibold">บันทึกการตั้งค่า</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global Firebase handles
+        window.firebaseApp = null;
+        window.db = null;
+        window.auth = null;
+        window.isFirebaseReady = false;
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'dms-project-tracking-prod';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDMS-MockKeyForOnlineWebAppContext",
+            authDomain: "dms-project-tracking.firebaseapp.com",
+            projectId: "dms-project-tracking"
+        };
+
+        try {
+            window.firebaseApp = initializeApp(firebaseConfig);
+            window.db = getFirestore(window.firebaseApp);
+            window.auth = getAuth(window.firebaseApp);
+
+            const initAuth = async () => {
+                try {
+                    if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                        await signInWithCustomToken(window.auth, __initial_auth_token);
+                    } else {
+                        await signInAnonymously(window.auth);
+                    }
+                } catch (e) {
+                    await signInAnonymously(window.auth);
+                }
+            };
+
+            initAuth().then(() => {
+                window.isFirebaseReady = true;
+                initRealtimeSync();
+            });
+        } catch (err) {
+            console.warn("Running in local storage fallback mode:", err);
+            window.isFirebaseReady = false;
+            loadDatabaseLocalFallback();
+        }
+    </script>
+
+    <script>
+        const WORKFLOW_STEPS = [
+            { step: 1, short: "รับเรื่องเข้า", label: "1. รับเรื่องเข้า", color: "bg-sky-500", badge: "bg-sky-100 text-sky-800 border-sky-200" },
+            { step: 2, short: "ประชุมพิจารณา", label: "2. ประชุมพิจารณา", color: "bg-blue-600", badge: "bg-blue-100 text-blue-800 border-blue-200" },
+            { step: 3, short: "ส่งเอกสารเสนอพิจารณาลงนาม", label: "3. ส่งเอกสารเพื่อดำเนินการเสนอพิจารณาลงนาม", color: "bg-indigo-500", badge: "bg-indigo-100 text-indigo-800 border-indigo-200" },
+            { step: 4, short: "เสนอผู้บริหารพิจารณาลงนาม", label: "4. เสนอผู้บริหารพิจารณาลงนาม", color: "bg-purple-600", badge: "bg-purple-100 text-purple-800 border-purple-200" },
+            { step: 5, short: "ผู้บริหารลงนามอนุมัติ", label: "5. ผู้บริหารลงนามอนุมัติ", color: "bg-teal-600", badge: "bg-teal-100 text-teal-800 border-teal-200" },
+            { step: 6, short: "แจ้งผลพิจารณาและส่งคืนหน่วยงาน", label: "6. แจ้งผลพิจารณาและส่งคืนหน่วยงาน", color: "bg-emerald-600", badge: "bg-emerald-100 text-emerald-800 border-emerald-200" }
+        ];
+
+        const STORAGE_KEY = "DMS_ONLINE_DB_LOCAL_FALLBACK";
+        const AUTH_KEY = "DMS_ONLINE_AUTH_V1";
+        const SESSION_KEY = "DMS_ONLINE_SESSION_V1";
+
+        let projects = [];
+        let activeDetailProjectId = null;
+
+        function getAuthCredentials() {
+            try {
+                const raw = localStorage.getItem(AUTH_KEY);
+                if (raw) return JSON.parse(raw);
+            } catch (e) {}
+            return { username: "admin", password: "1234" };
+        }
+
+        function checkLoginSession() {
+            const isLoggedIn = sessionStorage.getItem(SESSION_KEY) === "true";
+            const loginScreen = document.getElementById("login-screen");
+            const mainWindow = document.getElementById("main-app-window");
+            const creds = getAuthCredentials();
+            document.getElementById("login-username").value = creds.username;
+
+            if (isLoggedIn) {
+                loginScreen.classList.add("hidden");
+                mainWindow.classList.remove("hidden");
+                mainWindow.classList.add("flex");
+            } else {
+                loginScreen.classList.remove("hidden");
+                mainWindow.classList.add("hidden");
+                mainWindow.classList.remove("flex");
+            }
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const u = document.getElementById("login-username").value.trim();
+            const p = document.getElementById("login-password").value;
+            const creds = getAuthCredentials();
+            const errBox = document.getElementById("login-error-msg");
+
+            if (u === creds.username && p === creds.password) {
+                errBox.classList.add("hidden");
+                sessionStorage.setItem(SESSION_KEY, "true");
+                checkLoginSession();
+                showToast("เข้าสู่ระบบออนไลน์เรียบร้อยแล้ว", "success");
+            } else {
+                errBox.classList.remove("hidden");
+            }
+        }
+
+        function logoutSystem() {
+            sessionStorage.removeItem(SESSION_KEY);
+            document.getElementById("login-password").value = "";
+            checkLoginSession();
+            showToast("ออกจากระบบเรียบร้อยแล้ว", "info");
+        }
+
+        function toggleLoginPassword() {
+            const inp = document.getElementById("login-password");
+            inp.type = inp.type === "password" ? "text" : "password";
+        }
+
+        function openChangePasswordModal() {
+            const creds = getAuthCredentials();
+            document.getElementById("cfg-username").value = creds.username;
+            document.getElementById("cfg-old-pass").value = "";
+            document.getElementById("cfg-new-pass").value = "";
+            const modal = document.getElementById("change-password-modal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function closeChangePasswordModal() {
+            const modal = document.getElementById("change-password-modal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        function handleChangePassword(e) {
+            e.preventDefault();
+            const creds = getAuthCredentials();
+            const newUser = document.getElementById("cfg-username").value.trim();
+            const oldPass = document.getElementById("cfg-old-pass").value;
+            const newPass = document.getElementById("cfg-new-pass").value;
+
+            if (oldPass !== creds.password) {
+                showToast("รหัสผ่านเดิมไม่ถูกต้อง", "error");
+                return;
+            }
+            if (!newUser || !newPass) {
+                showToast("กรุณากรอกชื่อผู้ใช้งานและรหัสผ่านใหม่ให้ครบถ้วน", "warning");
+                return;
+            }
+            localStorage.setItem(AUTH_KEY, JSON.stringify({ username: newUser, password: newPass }));
+            document.getElementById("login-username").value = newUser;
+            closeChangePasswordModal();
+            showToast("เปลี่ยนชื่อผู้ใช้งานและรหัสผ่านเรียบร้อยแล้ว", "success");
+        }
+
+        function getInitialSampleProjects() {
+            return [
+                {
+                    id: "PRJ-1001",
+                    code: "1069001",
+                    fiscalYear: "2569",
+                    name: "โครงการพัฒนาระบบเชื่อมโยงข้อมูลสุขภาพและประวัติการรักษาผู้ป่วยเฉพาะทาง (DMS Health Link)",
+                    agency: "สถาบันสุขภาพเด็กแห่งชาติมหาราชินี",
+                    budget: 4850000,
+                    budgetType: "งบลงทุน (ครุภัณฑ์/สิ่งก่อสร้าง)",
+                    criteriaType: "ตรงเกณฑ์",
+                    docNo: "สธ 0310.04/1124",
+                    receivedDate: "2026-10-05",
+                    meetingDate: "2026-10-14",
+                    currentStep: "6",
+                    submittedSignDate: "2026-10-24",
+                    signedDate: "2026-10-28",
+                    returnedDate: "2026-10-30",
+                    rejectionReason: "",
+                    note: "ขอรับการพิจารณามาตรฐานความมั่นคงปลอดภัยไซเบอร์",
+                    logs: [
+                        { timestamp: "2026-10-05 09:30", actionDate: "2026-10-05", step: "1", stepLabel: "1. รับเรื่องเข้า", operator: "เจ้าหน้าที่สารบรรณ", remark: "รับหนังสือจากสถาบันสุขภาพเด็กฯ ลงทะเบียนรับเรียบร้อย" },
+                        { timestamp: "2026-10-14 13:30", actionDate: "2026-10-14", step: "2", stepLabel: "2. ประชุมพิจารณา", operator: "นักวิชาการคอมพิวเตอร์", remark: "คณะกรรมการประชุมพิจารณาเห็นชอบตามเกณฑ์" },
+                        { timestamp: "2026-10-30 13:45", actionDate: "2026-10-30", step: "6", stepLabel: "6. แจ้งผลพิจารณาและส่งคืนหน่วยงาน", operator: "เจ้าหน้าที่สารบรรณ", remark: "แจ้งผลการพิจารณาและส่งคืนเรื่องให้สถาบันสุขภาพเด็กฯ" }
+                    ]
+                }
+            ];
+        }
+
+        window.initRealtimeSync = function() {
+            if (!window.db || !window.auth) return;
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'dms-project-tracking-prod';
+            
+            import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js").then(({ doc, setDoc, onSnapshot }) => {
+                // Fixed even-segment path: artifacts/{appId}/public_data/projects_store (4 segments)
+                const projectsDocRef = doc(window.db, 'artifacts', appId, 'public_data', 'projects_store');
+                
+                onSnapshot(projectsDocRef, (docSnap) => {
+                    if (docSnap.exists() && docSnap.data().projects) {
+                        projects = docSnap.data().projects;
+                        renderAll();
+                        document.getElementById("cloud-sync-badge").innerHTML = `<i class="fa-solid fa-circle text-[6px] text-emerald-400"></i> ซิงค์ Cloud เรียบร้อย`;
+                    } else {
+                        projects = getInitialSampleProjects();
+                        setDoc(projectsDocRef, { projects: projects }).catch(() => {});
+                        renderAll();
+                    }
+                }, (error) => {
+                    console.warn("Firestore permission restricted. Switching to robust local storage mode:", error);
+                    document.getElementById("cloud-sync-badge").innerHTML = `<i class="fa-solid fa-circle text-[6px] text-amber-400"></i> โหมดบันทึกในเครื่อง (Offline Mode)`;
+                    loadDatabaseLocalFallback();
+                });
+            });
+        };
+
+        function loadDatabaseLocalFallback() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    projects = JSON.parse(raw);
+                } else {
+                    projects = getInitialSampleProjects();
+                    saveDatabaseLocalFallback();
+                }
+            } catch (e) {
+                projects = getInitialSampleProjects();
+            }
+            renderAll();
+        }
+
+        function saveDatabaseLocalFallback() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+            } catch (e) {}
+        }
+
+        window.saveDatabase = function() {
+            saveDatabaseLocalFallback();
+            if (window.db && window.isFirebaseReady) {
+                const appId = typeof __app_id !== 'undefined' ? __app_id : 'dms-project-tracking-prod';
+                import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js").then(({ doc, setDoc }) => {
+                    const projectsDocRef = doc(window.db, 'artifacts', appId, 'public_data', 'projects_store');
+                    setDoc(projectsDocRef, { projects: projects }).catch(err => {
+                        console.error("Cloud save failed:", err);
+                    });
+                });
+            }
+            updateStatusBar();
+        };
+
+        window.onload = function () {
+            checkLoginSession();
+            loadOperatorName();
+            startClock();
+            setTimeout(() => {
+                if (!projects || projects.length === 0) {
+                    loadDatabaseLocalFallback();
+                }
+            }, 1200);
+        };
+
+        function loadOperatorName() {
+            const saved = localStorage.getItem("DMS_OPERATOR_NAME_V1");
+            if (saved) {
+                document.getElementById("operator-name").value = saved;
+                document.getElementById("status-bar-operator").textContent = "ผู้ปฏิบัติงาน: " + saved;
+            }
+        }
+
+        function saveOperatorName(val) {
+            const name = val.trim() || "นักวิชาการคอมพิวเตอร์ปฏิบัติการ";
+            localStorage.setItem("DMS_OPERATOR_NAME_V1", name);
+            document.getElementById("status-bar-operator").textContent = "ผู้ปฏิบัติงาน: " + name;
+            showToast("บันทึกชื่อผู้ปฏิบัติงานเป็น: " + name, "success");
+        }
+
+        function getOperator() {
+            return document.getElementById("operator-name").value.trim() || "ผู้ปฏิบัติงานออนไลน์";
+        }
+
+        function renderAll() {
+            renderDashboard();
+            renderProjectTable();
+            renderGlobalAuditLog();
+            updateStatusBar();
+        }
+
+        function updateStatusBar() {
+            document.getElementById("nav-count-badge").textContent = projects.length;
+            document.getElementById("status-bar-count").textContent = `โครงการทั้งหมดบน Cloud: ${projects.length} รายการ`;
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
+            const target = document.getElementById("tab-" + tabId);
+            if (target) target.classList.remove("hidden");
+
+            document.querySelectorAll(".nav-btn").forEach(btn => {
+                if (btn.dataset.tab === tabId) {
+                    btn.classList.add("bg-dms-50", "text-dms-700", "border", "border-dms-200/80", "shadow-sm");
+                    btn.classList.remove("text-slate-600");
+                } else {
+                    btn.classList.remove("bg-dms-50", "text-dms-700", "border", "border-dms-200/80", "shadow-sm");
+                    btn.classList.add("text-slate-600");
+                }
+            });
+
+            if (tabId === "dashboard") renderDashboard();
+            if (tabId === "registry") renderProjectTable();
+            if (tabId === "audit") renderGlobalAuditLog();
+        }
+
+        function renderDashboard() {
+            const yearFilter = document.getElementById("dash-fiscal-filter").value;
+            const filtered = yearFilter === "ALL" ? projects : projects.filter(p => p.fiscalYear === yearFilter);
+
+            const total = filtered.length;
+            const rejected = filtered.filter(p => p.currentStep === "REJECTED").length;
+            const completed = filtered.filter(p => p.currentStep === "5" || p.currentStep === "6").length;
+            const inProgress = filtered.filter(p => p.currentStep !== "REJECTED" && parseInt(p.currentStep) < 5).length;
+
+            document.getElementById("kpi-total").textContent = total;
+            document.getElementById("kpi-inprogress").textContent = inProgress;
+            document.getElementById("kpi-completed").textContent = completed;
+            document.getElementById("kpi-rejected").textContent = rejected;
+
+            const chartContainer = document.getElementById("step-chart-container");
+            chartContainer.innerHTML = "";
+            const maxCount = Math.max(1, ...WORKFLOW_STEPS.map(s => filtered.filter(p => String(p.currentStep) === String(s.step)).length));
+
+            WORKFLOW_STEPS.forEach(s => {
+                const count = filtered.filter(p => String(p.currentStep) === String(s.step)).length;
+                const pct = Math.round((count / maxCount) * 100);
+                const row = document.createElement("div");
+                row.className = "group cursor-pointer p-2 rounded-lg hover:bg-slate-50 transition";
+                row.onclick = () => {
+                    document.getElementById("status-filter").value = String(s.step);
+                    document.getElementById("year-filter").value = yearFilter;
+                    switchTab("registry");
+                };
+                row.innerHTML = `
+                    <div class="flex items-center justify-between text-xs mb-1">
+                        <span class="font-medium text-slate-700 group-hover:text-dms-700 truncate pr-2">
+                            <span class="inline-block w-5 font-bold text-slate-400">${s.step}.</span> ${s.short}
+                        </span>
+                        <span class="font-bold ${count > 0 ? 'text-slate-800' : 'text-slate-400'} shrink-0">${count} โครงการ</span>
+                    </div>
+                    <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="${s.color} h-full rounded-full transition-all duration-500" style="width: ${count === 0 ? 0 : Math.max(6, pct)}%"></div>
+                    </div>
+                `;
+                chartContainer.appendChild(row);
+            });
+
+            const urgentContainer = document.getElementById("urgent-projects-list");
+            const activeProjects = filtered.filter(p => p.currentStep !== "6" && p.currentStep !== "REJECTED").slice(0, 4);
+            if (activeProjects.length === 0) {
+                urgentContainer.innerHTML = `<div class="text-xs text-slate-400 py-4 text-center">ไม่มีโครงการค้างดำเนินการบน Cloud</div>`;
+            } else {
+                urgentContainer.innerHTML = activeProjects.map(p => {
+                    const stepObj = getStepInfo(p.currentStep);
+                    return `
+                        <div onclick="openDetailModal('${p.id}')" class="p-3 rounded-lg border border-slate-200/80 hover:border-dms-300 hover:bg-sky-50/40 cursor-pointer transition flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-mono text-[11px] font-bold text-dms-700">${p.code}</span>
+                                    <span class="text-[11px] text-slate-400">• ${p.agency}</span>
+                                </div>
+                                <div class="text-xs font-semibold text-slate-800 truncate mt-0.5">${p.name}</div>
+                            </div>
+                            <span class="px-2 py-0.5 rounded text-[10px] font-semibold border shrink-0 ${stepObj.badge}">
+                                ขั้นที่ ${p.currentStep}
+                            </span>
+                        </div>
+                    `;
+                }).join("");
+            }
+
+            const allLogs = [];
+            filtered.forEach(p => {
+                (p.logs || []).forEach(l => {
+                    allLogs.push({ ...l, projectId: p.id, projectCode: p.code, projectName: p.name });
+                });
+            });
+            allLogs.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+
+            const recentLogBox = document.getElementById("dashboard-recent-logs");
+            recentLogBox.innerHTML = allLogs.slice(0, 4).map(l => `
+                <div onclick="openDetailModal('${l.projectId}')" class="flex items-start gap-2.5 text-xs cursor-pointer hover:bg-slate-50 p-1.5 rounded-lg transition">
+                    <div class="w-2 h-2 rounded-full bg-dms-500 mt-1.5 shrink-0"></div>
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center justify-between gap-1">
+                            <span class="font-bold text-dms-800">${l.projectCode}</span>
+                            <span class="text-[10px] text-slate-400 font-mono">${formatThaiDate(l.actionDate)}</span>
+                        </div>
+                        <p class="text-slate-700 font-medium truncate">${l.stepLabel}</p>
+                        <p class="text-slate-500 text-[11px] truncate">${l.remark || '-'}</p>
+                    </div>
+                </div>
+            `).join("") || `<div class="text-xs text-slate-400 text-center py-3">ยังไม่มีประวัติการบันทึก</div>`;
+        }
+
+        function renderProjectTable() {
+            const q = document.getElementById("search-input").value.trim().toLowerCase();
+            const meetDateFilter = document.getElementById("meeting-date-filter").value;
+            const statusFilter = document.getElementById("status-filter").value;
+            const yearFilter = document.getElementById("year-filter").value;
+
+            const filtered = projects.filter(p => {
+                const matchText = !q ||
+                    p.code.toLowerCase().includes(q) ||
+                    p.name.toLowerCase().includes(q) ||
+                    p.agency.toLowerCase().includes(q) ||
+                    (p.budgetType && p.budgetType.toLowerCase().includes(q)) ||
+                    (p.criteriaType && p.criteriaType.toLowerCase().includes(q));
+
+                const matchMeetingDate = !meetDateFilter || p.meetingDate === meetDateFilter;
+
+                let matchStatus = true;
+                if (statusFilter === "ACTIVE") {
+                    matchStatus = p.currentStep !== "6" && p.currentStep !== "REJECTED";
+                } else if (statusFilter !== "ALL") {
+                    matchStatus = String(p.currentStep) === String(statusFilter);
+                }
+
+                const matchYear = yearFilter === "ALL" || p.fiscalYear === yearFilter;
+                return matchText && matchMeetingDate && matchStatus && matchYear;
+            });
+
+            const tbody = document.getElementById("project-table-body");
+            const emptyState = document.getElementById("empty-table-state");
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = "";
+                emptyState.classList.remove("hidden");
+                return;
+            }
+            emptyState.classList.add("hidden");
+
+            tbody.innerHTML = filtered.map(p => {
+                const stepObj = getStepInfo(p.currentStep);
+                const progressPct = p.currentStep === "REJECTED" ? 100 : Math.round((parseInt(p.currentStep) / 6) * 100);
+                const isMeet = p.criteriaType !== "ไม่ตรงเกณฑ์";
+
+                return `
+                    <tr class="hover:bg-sky-50/50 transition group">
+                        <td class="py-3.5 px-4 align-top whitespace-nowrap">
+                            <div class="font-mono font-bold text-dms-700 text-xs">${p.code}</div>
+                            <div class="text-[11px] text-slate-500 mt-0.5">ปีงบฯ ${p.fiscalYear}</div>
+                        </td>
+                        <td class="py-3.5 px-4 align-top">
+                            <div onclick="openDetailModal('${p.id}')" class="font-semibold text-slate-800 hover:text-dms-700 cursor-pointer leading-snug">
+                                ${p.name}
+                            </div>
+                            <div class="flex flex-wrap items-center gap-1.5 mt-1.5 text-xs">
+                                <span class="text-slate-500 mr-1"><i class="fa-regular fa-building mr-1 text-slate-400"></i>${p.agency}</span>
+                                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px] font-medium border border-slate-200">${p.budgetType || 'ไม่ระบุประเภทงบฯ'}</span>
+                                <span class="px-2 py-0.5 rounded text-[11px] font-semibold border ${isMeet ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-amber-50 text-amber-700 border-amber-200'}">
+                                    ${p.criteriaType || 'ตรงเกณฑ์'}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 align-top whitespace-nowrap text-xs text-slate-700">
+                            <div class="font-medium">${formatThaiDate(p.receivedDate)}</div>
+                            <div class="text-[11px] text-slate-400">${p.docNo || '-'}</div>
+                        </td>
+                        <td class="py-3.5 px-4 align-top">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold border ${stepObj.badge}">
+                                ${p.currentStep === 'REJECTED' ? '<i class="fa-solid fa-ban"></i>' : `<span class="font-bold">${p.currentStep}/6</span>`}
+                                ${stepObj.short}
+                            </span>
+                            <div class="mt-1.5 text-[11px] text-slate-600 flex items-center gap-1">
+                                <i class="fa-regular fa-calendar-check text-blue-600"></i>
+                                <span>วันประชุม:</span>
+                                <strong class="${p.meetingDate ? 'text-blue-700' : 'text-slate-400 font-normal'}">${p.meetingDate ? formatThaiDate(p.meetingDate) : 'ยังไม่กำหนด'}</strong>
+                            </div>
+                            <div class="w-full max-w-[200px] h-1.5 bg-slate-100 rounded-full mt-1.5 overflow-hidden">
+                                <div class="${stepObj.color} h-full rounded-full" style="width: ${progressPct}%"></div>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 align-top text-xs space-y-1 whitespace-nowrap">
+                            <div class="text-slate-600">
+                                <span class="text-slate-400">เสนอเซ็น:</span>
+                                <span class="font-medium ${p.submittedSignDate ? 'text-indigo-700' : 'text-slate-400'}">${p.submittedSignDate ? formatThaiDate(p.submittedSignDate) : '-'}</span>
+                            </div>
+                            <div class="text-slate-600">
+                                <span class="text-slate-400">ลงนาม:</span>
+                                <span class="font-medium ${p.signedDate ? 'text-tealmed-700' : 'text-slate-400'}">${p.signedDate ? formatThaiDate(p.signedDate) : '-'}</span>
+                            </div>
+                            <div class="text-slate-600">
+                                <span class="text-slate-400">ส่งคืน:</span>
+                                <span class="font-medium ${p.returnedDate ? 'text-emerald-700' : 'text-slate-400'}">${p.returnedDate ? formatThaiDate(p.returnedDate) : '-'}</span>
+                            </div>
+                        </td>
+                        <td class="py-3.5 px-4 align-top text-right whitespace-nowrap">
+                            <button onclick="openDetailModal('${p.id}')" class="px-3 py-1.5 bg-dms-600 hover:bg-dms-700 text-white rounded-lg text-xs font-display font-medium shadow-xs transition">
+                                ติดตาม / อัปเดต
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        function resetFilters() {
+            document.getElementById("search-input").value = "";
+            document.getElementById("meeting-date-filter").value = "";
+            document.getElementById("status-filter").value = "ALL";
+            document.getElementById("year-filter").value = "ALL";
+            renderProjectTable();
+        }
+
+        function generateRegCodeFromDate(isoDate) {
+            const parts = (isoDate || new Date().toISOString().split("T")[0]).split("-");
+            const month = parts[1] || "01";
+            const yearBE2 = String((parseInt(parts[0], 10) || new Date().getFullYear()) + 543).slice(-2);
+            const prefix = `${month}${yearBE2}`;
+            const sameMonthCount = projects.filter(p => p.code && p.code.startsWith(prefix)).length;
+            const seq = String(sameMonthCount + 1).padStart(3, "0");
+            return `${prefix}${seq}`;
+        }
+
+        function autoGenerateRegCode() {
+            const editId = document.getElementById("edit-project-id").value;
+            if (editId) return;
+            const recDate = document.getElementById("field-received-date").value;
+            document.getElementById("field-code").value = generateRegCodeFromDate(recDate);
+        }
+
+        function openNewProjectModal() {
+            document.getElementById("edit-project-id").value = "";
+            document.getElementById("form-modal-title").textContent = "ลงทะเบียนรับเรื่องโครงการใหม่ (Cloud)";
+            document.getElementById("project-form").reset();
+
+            const today = new Date().toISOString().split("T")[0];
+            document.getElementById("field-received-date").value = today;
+            document.getElementById("field-code").value = generateRegCodeFromDate(today);
+
+            const modal = document.getElementById("project-form-modal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function openEditFromDetail() {
+            const p = projects.find(x => x.id === activeDetailProjectId);
+            if (!p) return;
+            closeDetailModal();
+
+            document.getElementById("edit-project-id").value = p.id;
+            document.getElementById("form-modal-title").textContent = "แก้ไขข้อมูลหลักโครงการ: " + p.code;
+            document.getElementById("field-code").value = p.code;
+            document.getElementById("field-year").value = p.fiscalYear;
+            document.getElementById("field-received-date").value = p.receivedDate;
+            document.getElementById("field-name").value = p.name;
+            document.getElementById("field-agency").value = p.agency;
+            document.getElementById("field-budget").value = p.budget || "";
+            document.getElementById("field-budget-type").value = p.budgetType || "งบลงทุน (ครุภัณฑ์/สิ่งก่อสร้าง)";
+            document.getElementById("field-criteria-type").value = p.criteriaType || "ตรงเกณฑ์";
+            document.getElementById("field-doc-no").value = p.docNo || "";
+            document.getElementById("field-note").value = p.note || "";
+
+            const modal = document.getElementById("project-form-modal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function closeProjectFormModal() {
+            const modal = document.getElementById("project-form-modal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        function handleProjectFormSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById("edit-project-id").value;
+            const nowStr = getCurrentTimestamp();
+            const operator = getOperator();
+
+            const data = {
+                code: document.getElementById("field-code").value.trim(),
+                fiscalYear: document.getElementById("field-year").value,
+                receivedDate: document.getElementById("field-received-date").value,
+                name: document.getElementById("field-name").value.trim(),
+                agency: document.getElementById("field-agency").value.trim(),
+                budget: parseFloat(document.getElementById("field-budget").value) || 0,
+                budgetType: document.getElementById("field-budget-type").value,
+                criteriaType: document.getElementById("field-criteria-type").value,
+                docNo: document.getElementById("field-doc-no").value.trim(),
+                note: document.getElementById("field-note").value.trim(),
+            };
+
+            if (editId) {
+                const idx = projects.findIndex(p => p.id === editId);
+                if (idx !== -1) {
+                    projects[idx] = { ...projects[idx], ...data };
+                    projects[idx].logs.unshift({
+                        timestamp: nowStr,
+                        actionDate: new Date().toISOString().split("T")[0],
+                        step: projects[idx].currentStep,
+                        stepLabel: "แก้ไขข้อมูลทะเบียนโครงการ",
+                        operator: operator,
+                        remark: `ปรับปรุงข้อมูลพื้นฐาน (${data.budgetType} / ${data.criteriaType})`
+                    });
+                    window.saveDatabase();
+                    renderAll();
+                    closeProjectFormModal();
+                    showToast("บันทึกการแก้ไขขึ้น Cloud สำเร็จ", "success");
+                }
+            } else {
+                const newProject = {
+                    id: "PRJ-" + Date.now(),
+                    ...data,
+                    currentStep: "1",
+                    meetingDate: "",
+                    submittedSignDate: "",
+                    signedDate: "",
+                    returnedDate: "",
+                    rejectionReason: "",
+                    logs: [
+                        {
+                            timestamp: nowStr,
+                            actionDate: data.receivedDate,
+                            step: "1",
+                            stepLabel: "1. รับเรื่องเข้า",
+                            operator: operator,
+                            remark: `ลงทะเบียนรับเรื่องเข้า (${data.budgetType} • ${data.criteriaType})`
+                        }
+                    ]
+                };
+                projects.unshift(newProject);
+                window.saveDatabase();
+                renderAll();
+                closeProjectFormModal();
+                showToast("บันทึกโครงการใหม่ขึ้น Cloud สำเร็จ: " + newProject.code, "success");
+            }
+        }
+
+        function openDetailModal(projectId) {
+            const p = projects.find(x => x.id === projectId);
+            if (!p) return;
+            activeDetailProjectId = projectId;
+
+            document.getElementById("detail-code-badge").textContent = p.code;
+            document.getElementById("detail-project-title").textContent = p.name;
+            document.getElementById("detail-agency").textContent = p.agency;
+            document.getElementById("detail-budget").textContent = `${Number(p.budget || 0).toLocaleString()} บาท (${p.budgetType || '-'})`;
+
+            const criteriaEl = document.getElementById("detail-criteria-type");
+            criteriaEl.textContent = p.criteriaType || "ตรงเกณฑ์";
+            criteriaEl.className = `font-semibold ${p.criteriaType === 'ไม่ตรงเกณฑ์' ? 'text-amber-700' : 'text-teal-700'}`;
+
+            document.getElementById("detail-received-date").textContent = formatThaiDate(p.receivedDate);
+            document.getElementById("detail-meeting-date").textContent = p.meetingDate ? formatThaiDate(p.meetingDate) : "-";
+            document.getElementById("detail-submitted-sign-date").textContent = p.submittedSignDate ? formatThaiDate(p.submittedSignDate) : "-";
+            document.getElementById("detail-signed-date").textContent = p.signedDate ? formatThaiDate(p.signedDate) : "-";
+            document.getElementById("detail-returned-date").textContent = p.returnedDate ? formatThaiDate(p.returnedDate) : "-";
+            document.getElementById("detail-doc-note").textContent = `${p.docNo ? '[' + p.docNo + '] ' : ''}${p.note || '-'}`;
+
+            const stepObj = getStepInfo(p.currentStep);
+            const badgeEl = document.getElementById("detail-current-step-badge");
+            badgeEl.textContent = stepObj.label;
+            badgeEl.className = `px-2.5 py-0.5 rounded-full text-xs font-semibold border ${stepObj.badge}`;
+
+            const rejBox = document.getElementById("detail-rejection-box");
+            if (p.currentStep === "REJECTED") {
+                rejBox.classList.remove("hidden");
+                document.getElementById("detail-rejection-reason").textContent = "เหตุผล: " + (p.rejectionReason || "ไม่ระบุเหตุผล");
+            } else {
+                rejBox.classList.add("hidden");
+            }
+
+            const stepSelect = document.getElementById("update-step-select");
+            if (p.currentStep !== "REJECTED" && parseInt(p.currentStep) < 6) {
+                stepSelect.value = String(parseInt(p.currentStep) + 1);
+            } else {
+                stepSelect.value = p.currentStep;
+            }
+
+            const today = new Date().toISOString().split("T")[0];
+            document.getElementById("update-status-date").value = today;
+            document.getElementById("update-meeting-date").value = p.meetingDate || today;
+            document.getElementById("update-submitted-sign-date").value = p.submittedSignDate || today;
+            document.getElementById("update-signed-date").value = p.signedDate || today;
+            document.getElementById("update-returned-date").value = p.returnedDate || today;
+            document.getElementById("update-rejection-reason").value = p.rejectionReason || "";
+            document.getElementById("update-remark").value = "";
+
+            toggleWorkflowDateFields();
+            renderProjectTimeline(p);
+
+            const modal = document.getElementById("project-detail-modal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function closeDetailModal() {
+            const modal = document.getElementById("project-detail-modal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+            activeDetailProjectId = null;
+        }
+
+        function toggleWorkflowDateFields() {
+            const val = document.getElementById("update-step-select").value;
+            document.getElementById("box-meeting-date").classList.toggle("hidden", val !== "2");
+            document.getElementById("box-submitted-sign-date").classList.toggle("hidden", val !== "4");
+            document.getElementById("box-signed-date").classList.toggle("hidden", val !== "5");
+            document.getElementById("box-returned-date").classList.toggle("hidden", val !== "6");
+            document.getElementById("box-rejection-reason").classList.toggle("hidden", val !== "REJECTED");
+        }
+
+        function saveWorkflowUpdate() {
+            const p = projects.find(x => x.id === activeDetailProjectId);
+            if (!p) return;
+
+            const newStep = document.getElementById("update-step-select").value;
+            const actionDate = document.getElementById("update-status-date").value;
+            const remark = document.getElementById("update-remark").value.trim();
+            const operator = getOperator();
+
+            if (!actionDate) {
+                showToast("กรุณาระบุวันที่เปลี่ยนสถานะ", "warning");
+                return;
+            }
+
+            let extraRemark = "";
+            if (newStep === "2") {
+                const meetDate = document.getElementById("update-meeting-date").value;
+                if (!meetDate) { showToast("กรุณาระบุวันที่ประชุมพิจารณา", "warning"); return; }
+                p.meetingDate = meetDate;
+                extraRemark = ` (วันที่ประชุมพิจารณา: ${formatThaiDate(meetDate)})`;
+            } else if (newStep === "4") {
+                const subDate = document.getElementById("update-submitted-sign-date").value;
+                if (!subDate) { showToast("กรุณาระบุวันที่เสนอเซ็น", "warning"); return; }
+                p.submittedSignDate = subDate;
+                extraRemark = ` (วันที่เสนอเซ็น: ${formatThaiDate(subDate)})`;
+            } else if (newStep === "5") {
+                const signDate = document.getElementById("update-signed-date").value;
+                if (!signDate) { showToast("กรุณาระบุวันที่ผู้บริหารลงนาม", "warning"); return; }
+                p.signedDate = signDate;
+                extraRemark = ` (วันที่ลงนาม: ${formatThaiDate(signDate)})`;
+            } else if (newStep === "6") {
+                const retDate = document.getElementById("update-returned-date").value;
+                if (!retDate) { showToast("กรุณาระบุวันที่ส่งคืนหน่วยงาน", "warning"); return; }
+                p.returnedDate = retDate;
+                extraRemark = ` (วันที่ส่งคืนหน่วยงาน: ${formatThaiDate(retDate)})`;
+            } else if (newStep === "REJECTED") {
+                const reason = document.getElementById("update-rejection-reason").value.trim();
+                if (!reason) { showToast("กรุณาระบุเหตุผลที่ไม่ผ่านการพิจารณาหรือยกเลิก", "warning"); return; }
+                p.rejectionReason = reason;
+                extraRemark = ` เหตุผล: ${reason}`;
+            }
+
+            p.currentStep = newStep;
+            const stepObj = getStepInfo(newStep);
+
+            p.logs.unshift({
+                timestamp: getCurrentTimestamp(),
+                actionDate: actionDate,
+                step: newStep,
+                stepLabel: stepObj.label,
+                operator: operator,
+                remark: (remark || "อัปเดตสถานะการดำเนินงาน") + extraRemark
+            });
+
+            window.saveDatabase();
+            renderAll();
+            openDetailModal(p.id);
+            showToast(`อัปเดตสถานะเป็น "${stepObj.short}" บน Cloud สำเร็จ`, "success");
+        }
+
+        function renderProjectTimeline(p) {
+            const container = document.getElementById("detail-timeline-container");
+            const logs = p.logs || [];
+            document.getElementById("detail-log-count").textContent = `${logs.length} รายการ`;
+
+            container.innerHTML = logs.map((l, idx) => {
+                const isReject = l.step === "REJECTED";
+                return `
+                    <div class="relative pl-5 pb-3 border-l-2 ${idx === 0 ? (isReject ? 'border-rose-500' : 'border-dms-500') : 'border-slate-200'} last:border-l-transparent">
+                        <div class="w-3 h-3 rounded-full ${idx === 0 ? (isReject ? 'bg-rose-500 ring-4 ring-rose-100' : 'bg-dms-600 ring-4 ring-dms-100') : 'bg-slate-300'} absolute -left-[7px] top-1"></div>
+                        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200/80">
+                            <div class="flex items-center justify-between gap-2 text-[11px]">
+                                <span class="font-bold ${isReject ? 'text-rose-700' : 'text-dms-800'}">${l.stepLabel}</span>
+                                <span class="font-mono text-slate-500 shrink-0">${formatThaiDate(l.actionDate)}</span>
+                            </div>
+                            <p class="text-xs text-slate-700 mt-1 leading-relaxed">${l.remark}</p>
+                            <div class="flex items-center justify-between text-[10px] text-slate-400 mt-1.5 pt-1 border-t border-slate-200/60">
+                                <span><i class="fa-solid fa-user-pen mr-1"></i>${l.operator}</span>
+                                <span class="font-mono">บันทึกเมื่อ ${l.timestamp}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        function deleteCurrentProject() {
+            const p = projects.find(x => x.id === activeDetailProjectId);
+            if (!p) return;
+            openConfirmModal(
+                "ยืนยันการลบโครงการ",
+                `คุณต้องการลบโครงการ "${p.code} - ${p.name}" ออกจาก Cloud ใช่หรือไม่?`,
+                () => {
+                    projects = projects.filter(x => x.id !== p.id);
+                    window.saveDatabase();
+                    renderAll();
+                    closeDetailModal();
+                    showToast("ลบโครงการออกจากระบบแล้ว", "info");
+                }
+            );
+        }
+
+        function renderGlobalAuditLog() {
+            const q = document.getElementById("audit-search").value.trim().toLowerCase();
+            const allLogs = [];
+            projects.forEach(p => {
+                (p.logs || []).forEach(l => {
+                    allLogs.push({
+                        ...l,
+                        projectId: p.id,
+                        projectCode: p.code,
+                        projectName: p.name,
+                        agency: p.agency
+                    });
+                });
+            });
+            allLogs.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+
+            const filtered = allLogs.filter(l =>
+                !q ||
+                l.projectCode.toLowerCase().includes(q) ||
+                l.projectName.toLowerCase().includes(q) ||
+                l.stepLabel.toLowerCase().includes(q) ||
+                l.remark.toLowerCase().includes(q)
+            );
+
+            const container = document.getElementById("global-audit-list");
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="text-center py-8 text-sm text-slate-400">ไม่พบประวัติการดำเนินงาน</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(l => `
+                <div onclick="openDetailModal('${l.projectId}')" class="p-3.5 rounded-xl border border-slate-200 hover:border-dms-300 hover:bg-sky-50/30 cursor-pointer transition flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div class="space-y-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="font-mono text-xs font-bold px-2 py-0.5 rounded bg-dms-100 text-dms-800">${l.projectCode}</span>
+                            <span class="text-xs font-bold ${l.step === 'REJECTED' ? 'text-rose-600' : 'text-tealmed-700'}">${l.stepLabel}</span>
+                            <span class="text-xs text-slate-400">• วันที่ดำเนินการ: ${formatThaiDate(l.actionDate)}</span>
+                        </div>
+                        <div class="text-sm font-semibold text-slate-800">${l.projectName}</div>
+                        <div class="text-xs text-slate-600">${l.remark}</div>
+                    </div>
+                    <div class="text-left sm:text-right shrink-0 text-xs text-slate-500">
+                        <div class="font-medium text-slate-700">${l.operator}</div>
+                        <div class="font-mono text-[11px] text-slate-400">${l.timestamp}</div>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function exportToCSV() {
+            const headers = [
+                "เลขทะเบียนรับ", "ปีงบประมาณ", "ชื่อโครงการ", "หน่วยงานเจ้าของโครงการ",
+                "ประเภทของงบประมาณ", "ประเภทโครงการ (เกณฑ์)", "งบประมาณ (บาท)",
+                "เลขที่หนังสือรับ", "วันที่รับเรื่อง", "วันที่ประชุมพิจารณา",
+                "สถานะปัจจุบัน (6 ขั้นตอน)", "วันที่เสนอเซ็น", "วันที่ลงนาม", "วันที่ส่งคืนหน่วยงาน", "เหตุผลที่ไม่ผ่าน/ยกเลิก", "หมายเหตุ"
+            ];
+
+            const rows = projects.map(p => {
+                const stepObj = getStepInfo(p.currentStep);
+                return [
+                    p.code, p.fiscalYear, p.name, p.agency,
+                    p.budgetType || "", p.criteriaType || "", p.budget || 0,
+                    p.docNo || "", p.receivedDate || "", p.meetingDate || "",
+                    stepObj.label, p.submittedSignDate || "", p.signedDate || "",
+                    p.returnedDate || "", p.rejectionReason || "", p.note || ""
+                ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(",");
+            });
+
+            const csvContent = "\uFEFF" + headers.join(",") + "\n" + rows.join("\n");
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            const dateTag = new Date().toISOString().split("T")[0];
+            a.href = url;
+            a.download = `DMS_Project_Tracking_Online_${dateTag}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("ส่งออกไฟล์ Excel เรียบร้อยแล้ว", "success");
+        }
+
+        function backupDatabase() {
+            const payload = {
+                app: "DMS Project Tracking Online - สำนักดิจิทัลการแพทย์ กรมการแพทย์",
+                version: "2.0",
+                exportedAt: getCurrentTimestamp(),
+                projects: projects
+            };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            const dateTag = new Date().toISOString().split("T")[0];
+            a.href = url;
+            a.download = `DMS_Cloud_Backup_${dateTag}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("ดาวน์โหลดไฟล์สำรองข้อมูล Cloud สำเร็จ", "success");
+        }
+
+        function getStepInfo(stepVal) {
+            if (stepVal === "REJECTED") {
+                return {
+                    step: "REJECTED",
+                    short: "ไม่ผ่าน / ยกเลิก",
+                    label: "ไม่ผ่านการพิจารณา / ยกเลิกโครงการ",
+                    color: "bg-rose-600",
+                    badge: "bg-rose-100 text-rose-800 border-rose-200"
+                };
+            }
+            return WORKFLOW_STEPS.find(s => String(s.step) === String(stepVal)) || WORKFLOW_STEPS[0];
+        }
+
+        function formatThaiDate(isoDate) {
+            if (!isoDate) return "-";
+            const parts = isoDate.split("-");
+            if (parts.length !== 3) return isoDate;
+            const months = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+            const yearBE = parseInt(parts[0], 10) + 543;
+            const monthIdx = parseInt(parts[1], 10) - 1;
+            const day = parseInt(parts[2], 10);
+            return `${day} ${months[monthIdx] || parts[1]} ${yearBE}`;
+        }
+
+        function getCurrentTimestamp() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, "0");
+            const d = String(now.getDate()).padStart(2, "0");
+            const hh = String(now.getHours()).padStart(2, "0");
+            const mm = String(now.getMinutes()).padStart(2, "0");
+            return `${y}-${m}-${d} ${hh}:${mm}`;
+        }
+
+        function startClock() {
+            const update = () => {
+                const now = new Date();
+                const dateStr = now.toLocaleDateString("th-TH", { day: "2-digit", month: "short", year: "numeric" });
+                const timeStr = now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+                document.getElementById("status-bar-clock").textContent = `${dateStr} ${timeStr}`;
+            };
+            update();
+            setInterval(update, 1000);
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen().catch(() => {});
+            }
+        }
+
+        function showToast(message, type = "info") {
+            const container = document.getElementById("toast-container");
+            const styles = {
+                success: "bg-emerald-800 text-white border-emerald-600",
+                warning: "bg-amber-800 text-white border-amber-600",
+                error: "bg-rose-800 text-white border-rose-600",
+                info: "bg-slate-800 text-white border-slate-600"
+            };
+            const icons = {
+                success: "fa-circle-check text-emerald-300",
+                warning: "fa-triangle-exclamation text-amber-300",
+                error: "fa-circle-xmark text-rose-300",
+                info: "fa-circle-info text-sky-300"
+            };
+            const toast = document.createElement("div");
+            toast.className = `pointer-events-auto px-4 py-2.5 rounded-lg shadow-lg border text-xs font-medium flex items-center gap-2.5 animate-fade ${styles[type] || styles.info}`;
+            toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = "0";
+                toast.style.transition = "opacity 0.3s";
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        let confirmCallback = null;
+        function openConfirmModal(title, message, onConfirm) {
+            document.getElementById("confirm-title").textContent = title;
+            document.getElementById("confirm-message").textContent = message;
+            confirmCallback = onConfirm;
+            const modal = document.getElementById("confirm-modal");
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById("confirm-modal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+            confirmCallback = null;
+        }
+
+        document.getElementById("confirm-action-btn").onclick = function () {
+            if (confirmCallback) confirmCallback();
+            closeConfirmModal();
+        };
+    </script>
+</body>
+</html>
