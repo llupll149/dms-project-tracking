@@ -984,22 +984,28 @@
             if (!window.db || !window.auth) return;
             const appId = typeof __app_id !== 'undefined' ? __app_id : 'dms-project-tracking-prod';
             
-            import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js").then(({ doc, setDoc, onSnapshot }) => {
+            import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js").then(({ doc, setDoc, getDoc, onSnapshot }) => {
                 // Fixed even-segment path: artifacts/{appId}/public_data/projects_store (4 segments)
                 const projectsDocRef = doc(window.db, 'artifacts', appId, 'public_data', 'projects_store');
                 
+                // First check if document exists, if not initialize with default sample projects
+                getDoc(projectsDocRef).then((docSnap) => {
+                    if (!docSnap.exists() || !docSnap.data().projects) {
+                        const initial = getInitialSampleProjects();
+                        setDoc(projectsDocRef, { projects: initial }).catch(err => console.log("Init setDoc error:", err));
+                    }
+                }).catch(err => console.log("getDoc error:", err));
+
+                // Listen for real-time updates across all connected devices
                 onSnapshot(projectsDocRef, (docSnap) => {
                     if (docSnap.exists() && docSnap.data().projects) {
                         projects = docSnap.data().projects;
+                        saveDatabaseLocalFallback();
                         renderAll();
                         document.getElementById("cloud-sync-badge").innerHTML = `<i class="fa-solid fa-circle text-[6px] text-emerald-400"></i> ซิงค์ Cloud เรียบร้อย`;
-                    } else {
-                        projects = getInitialSampleProjects();
-                        setDoc(projectsDocRef, { projects: projects }).catch(() => {});
-                        renderAll();
                     }
                 }, (error) => {
-                    console.warn("Firestore permission restricted. Switching to robust local storage mode:", error);
+                    console.warn("Firestore listener warning, using local state:", error);
                     document.getElementById("cloud-sync-badge").innerHTML = `<i class="fa-solid fa-circle text-[6px] text-amber-400"></i> โหมดบันทึกในเครื่อง (Offline Mode)`;
                     loadDatabaseLocalFallback();
                 });
