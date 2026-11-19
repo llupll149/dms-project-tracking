@@ -1671,9 +1671,24 @@
                 yearBEShort = String(parseInt(parts[0], 10) + 543).slice(-2);
             }
             const prefix = `${monthStr}${yearBEShort}`;
-            const samePrefixCount = projects.filter(p => p.code && p.code.startsWith(prefix)).length;
-            const running = String(samePrefixCount + 1).padStart(3, "0");
-            document.getElementById("field-code").value = `${prefix}${running}`;
+            // Find the highest existing running number for this month+year prefix so deleted items don't cause duplicates
+            let maxSeq = 0;
+            projects.forEach(p => {
+                if (p.code && p.code.startsWith(prefix)) {
+                    const suffix = p.code.slice(prefix.length);
+                    const num = parseInt(suffix, 10);
+                    if (!isNaN(num) && num > maxSeq) {
+                        maxSeq = num;
+                    }
+                }
+            });
+            let nextSeq = maxSeq + 1;
+            let candidate = `${prefix}${String(nextSeq).padStart(3, "0")}`;
+            while (projects.some(p => p.code && p.code.toLowerCase() === candidate.toLowerCase())) {
+                nextSeq++;
+                candidate = `${prefix}${String(nextSeq).padStart(3, "0")}`;
+            }
+            document.getElementById("field-code").value = candidate;
         }
 
         function openNewProjectModal() {
@@ -1733,8 +1748,26 @@
             const nowStr = getCurrentTimestamp();
             const operator = getOperator();
 
+            const codeVal = document.getElementById("field-code").value.trim();
+            if (!codeVal) {
+                showToast("กรุณาระบุเลขทะเบียนรับ", "warning");
+                return;
+            }
+
+            // Prevent duplicate registration code across all projects
+            const isDuplicateCode = projects.some(p =>
+                p.code &&
+                p.code.trim().toLowerCase() === codeVal.toLowerCase() &&
+                p.id !== editId
+            );
+            if (isDuplicateCode) {
+                showToast(`เลขทะเบียนรับ "${codeVal}" มีอยู่ในระบบแล้ว ไม่สามารถใช้ซ้ำได้`, "error");
+                document.getElementById("field-code").focus();
+                return;
+            }
+
             const data = {
-                code: document.getElementById("field-code").value.trim(),
+                code: codeVal,
                 fiscalYear: document.getElementById("field-year").value,
                 receivedDate: document.getElementById("field-received-date").value,
                 name: document.getElementById("field-name").value.trim(),
