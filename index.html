@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>สำนักดิจิทัลการแพทย์ - DMS Project Tracking</title>
+    <title>DMS Project Tracking - สำนักดิจิทัลการแพทย์</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -206,6 +206,10 @@
                         <button onclick="switchTab('backup')" data-tab="backup" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-all">
                             <i class="fa-solid fa-database w-5 text-center text-slate-500"></i>
                             <span class="hidden md:inline font-display">ส่งออก Excel & สำรองข้อมูล</span>
+                        </button>
+                        <button onclick="switchTab('users')" data-tab="users" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-all">
+                            <i class="fa-solid fa-users-gear w-5 text-center text-slate-500"></i>
+                            <span class="hidden md:inline font-display">จัดการบัญชีผู้ใช้งาน</span>
                         </button>
                     </nav>
                 </div>
@@ -484,6 +488,36 @@
                             <button onclick="backupDatabase()" class="mt-6 w-full py-2.5 px-4 bg-dms-600 hover:bg-dms-700 text-white rounded-lg text-sm font-display font-medium flex items-center justify-center gap-2 shadow-sm transition">
                                 <i class="fa-solid fa-floppy-disk"></i> ดาวน์โหลดไฟล์สำรองข้อมูล
                             </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== TAB 5: USER MANAGEMENT ==================== -->
+                <section id="tab-users" class="tab-content hidden animate-fade space-y-5">
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800">จัดการบัญชีผู้ใช้งานระบบ (Multi-User Management)</h2>
+                            <p class="text-xs text-slate-500 mt-0.5">เพิ่ม แก้ไข หรือลบบัญชีสำหรับเจ้าหน้าที่แต่ละคน ข้อมูลบัญชีซิงค์ผ่าน Cloud อัตโนมัติเพื่อให้เข้าใช้งานพร้อมกันได้หลายเครื่อง</p>
+                        </div>
+                        <button onclick="openUserModal()" class="px-4 py-2 bg-dms-600 hover:bg-dms-700 text-white rounded-lg text-xs font-display font-semibold flex items-center gap-1.5 shadow-sm transition shrink-0">
+                            <i class="fa-solid fa-user-plus"></i> เพิ่มผู้ใช้งานใหม่
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-100/90 border-b border-slate-200 text-slate-600 text-xs font-display uppercase tracking-wider">
+                                        <th class="py-3 px-4">ชื่อผู้ใช้งาน (Username)</th>
+                                        <th class="py-3 px-4">ชื่อ-นามสกุล / ตำแหน่ง (แสดงในประวัติ)</th>
+                                        <th class="py-3 px-4">สิทธิ์การใช้งาน</th>
+                                        <th class="py-3 px-4">รหัสผ่าน</th>
+                                        <th class="py-3 px-4 text-right">จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
                         </div>
                     </div>
                 </section>
@@ -771,17 +805,21 @@
     <div id="change-password-modal" class="fixed inset-0 bg-slate-900/60 z-50 hidden items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-xl shadow-2xl border border-slate-200 overflow-hidden animate-fade">
             <div class="bg-dms-800 text-white px-4 py-3 flex items-center justify-between">
-                <h4 class="font-display font-semibold text-sm"><i class="fa-solid fa-key text-teal-300 mr-1.5"></i>ตั้งค่าบัญชีและรหัสผ่านเข้าใช้งาน</h4>
+                <h4 class="font-display font-semibold text-sm"><i class="fa-solid fa-key text-teal-300 mr-1.5"></i>เปลี่ยนรหัสผ่านส่วนตัว</h4>
                 <button onclick="closeChangePasswordModal()" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form onsubmit="handleChangePassword(event)" class="p-4 space-y-3">
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อผู้ใช้งาน (Username)</label>
-                    <input type="text" id="cfg-username" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                    <input type="text" id="cfg-username" readonly class="w-full px-3 py-2 border border-slate-200 bg-slate-100 text-slate-600 rounded-lg text-sm font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อ-นามสกุล / ตำแหน่งที่แสดง</label>
+                    <input type="text" id="cfg-fullname" required class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">รหัสผ่านเดิม</label>
-                    <input type="password" id="cfg-old-pass" required placeholder="ระบุรหัสผ่านเดิม (เริ่มต้น 1234)" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                    <input type="password" id="cfg-old-pass" required placeholder="ระบุรหัสผ่านเดิม" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-700 mb-1">รหัสผ่านใหม่</label>
@@ -789,7 +827,43 @@
                 </div>
                 <div class="pt-2 flex justify-end gap-2">
                     <button type="button" onclick="closeChangePasswordModal()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">ยกเลิก</button>
-                    <button type="submit" class="px-4 py-1.5 bg-dms-600 hover:bg-dms-700 text-white rounded-lg text-xs font-semibold">บันทึกการตั้งค่า</button>
+                    <button type="submit" class="px-4 py-1.5 bg-dms-600 hover:bg-dms-700 text-white rounded-lg text-xs font-semibold">บันทึกการเปลี่ยนแปลง</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add/Edit User Modal -->
+    <div id="user-form-modal" class="fixed inset-0 bg-slate-900/60 z-50 hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-xl shadow-2xl border border-slate-200 overflow-hidden animate-fade">
+            <div class="bg-dms-800 text-white px-4 py-3 flex items-center justify-between">
+                <h4 id="user-modal-title" class="font-display font-semibold text-sm"><i class="fa-solid fa-user-plus text-teal-300 mr-1.5"></i>เพิ่มบัญชีผู้ใช้งานใหม่</h4>
+                <button onclick="closeUserModal()" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="handleUserFormSubmit(event)" class="p-4 space-y-3">
+                <input type="hidden" id="edit-user-id">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อผู้ใช้งานสำหรับล็อกอิน (Username) <span class="text-rose-500">*</span></label>
+                    <input type="text" id="usr-username" required placeholder="เช่น user01 หรือ somchai" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:border-dms-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">รหัสผ่าน (Password) <span class="text-rose-500">*</span></label>
+                    <input type="text" id="usr-password" required placeholder="กำหนดรหัสผ่าน" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm font-mono focus:outline-none focus:border-dms-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อ-นามสกุล / ตำแหน่ง (แสดงอัตโนมัติในประวัติ) <span class="text-rose-500">*</span></label>
+                    <input type="text" id="usr-fullname" required placeholder="เช่น นายสมชาย ใจดี (นักวิชาการคอมพิวเตอร์)" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">สิทธิ์การใช้งาน</label>
+                    <select id="usr-role" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-dms-500">
+                        <option value="staff">เจ้าหน้าที่ปฏิบัติงาน (Staff)</option>
+                        <option value="admin">ผู้ดูแลระบบ (Admin)</option>
+                    </select>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeUserModal()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-1.5 bg-dms-600 hover:bg-dms-700 text-white rounded-lg text-xs font-semibold">บันทึกบัญชีผู้ใช้</button>
                 </div>
             </form>
         </div>
@@ -844,8 +918,8 @@
         window.initRealtimeSync = function() {
             if (!window.db || !window.auth) return;
             
-            // CORRECT EVEN-SEGMENT FIRESTORE PATH: artifacts/{appId}/public_data/projects_store (4 segments)
-            const projectsDocRef = doc(window.db, 'artifacts', appId, 'public_data', 'projects_store');
+            // CORRECT PUBLIC DATA FIRESTORE PATH: artifacts/{appId}/public/data/projects/projects_store
+            const projectsDocRef = doc(window.db, 'artifacts', appId, 'public', 'data', 'projects', 'projects_store');
             
             getDoc(projectsDocRef).then((docSnap) => {
                 if (!docSnap.exists() || !docSnap.data().projects) {
@@ -856,8 +930,13 @@
 
             // Real-time listener across all devices
             onSnapshot(projectsDocRef, (docSnap) => {
-                if (docSnap.exists() && docSnap.data().projects) {
-                    projects = docSnap.data().projects;
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.projects) projects = data.projects;
+                    if (data.users && Array.isArray(data.users) && data.users.length > 0) {
+                        usersList = data.users;
+                        saveUsersLocalFallback();
+                    }
                     saveDatabaseLocalFallback();
                     renderAll();
                     const badge = document.getElementById("cloud-sync-badge");
@@ -883,31 +962,60 @@
         ];
 
         const STORAGE_KEY = "DMS_ONLINE_DB_LOCAL_FALLBACK";
-        const AUTH_KEY = "DMS_ONLINE_AUTH_V1";
-        const SESSION_KEY = "DMS_ONLINE_SESSION_V1";
+        const USERS_STORAGE_KEY = "DMS_ONLINE_USERS_V2";
+        const SESSION_USER_KEY = "DMS_ONLINE_CURRENT_USER_V2";
 
         let projects = [];
+        let usersList = [];
         let activeDetailProjectId = null;
 
-        function getAuthCredentials() {
+        function getDefaultUsers() {
+            return [
+                { id: "USR-1", username: "admin", password: "1234", fullName: "ผู้ดูแลระบบ (Admin สำนักดิจิทัลการแพทย์)", role: "admin" },
+                { id: "USR-2", username: "staff01", password: "1234", fullName: "นักวิชาการคอมพิวเตอร์ปฏิบัติการ", role: "staff" }
+            ];
+        }
+
+        function loadUsersLocalFallback() {
             try {
-                const raw = localStorage.getItem(AUTH_KEY);
+                const raw = localStorage.getItem(USERS_STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        usersList = parsed;
+                        return;
+                    }
+                }
+            } catch (e) {}
+            usersList = getDefaultUsers();
+            saveUsersLocalFallback();
+        }
+
+        function saveUsersLocalFallback() {
+            try {
+                localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(usersList));
+            } catch (e) {}
+        }
+
+        function getCurrentSessionUser() {
+            try {
+                const raw = sessionStorage.getItem(SESSION_USER_KEY);
                 if (raw) return JSON.parse(raw);
             } catch (e) {}
-            return { username: "admin", password: "1234" };
+            return null;
         }
 
         function checkLoginSession() {
-            const isLoggedIn = sessionStorage.getItem(SESSION_KEY) === "true";
+            const currentUser = getCurrentSessionUser();
             const loginScreen = document.getElementById("login-screen");
             const mainWindow = document.getElementById("main-app-window");
-            const creds = getAuthCredentials();
-            document.getElementById("login-username").value = creds.username;
 
-            if (isLoggedIn) {
+            if (currentUser) {
                 loginScreen.classList.add("hidden");
                 mainWindow.classList.remove("hidden");
                 mainWindow.classList.add("flex");
+                document.getElementById("operator-name").value = currentUser.fullName;
+                document.getElementById("status-bar-operator").textContent = `ผู้ปฏิบัติงาน: ${currentUser.fullName} (${currentUser.username})`;
             } else {
                 loginScreen.classList.remove("hidden");
                 mainWindow.classList.add("hidden");
@@ -919,21 +1027,21 @@
             e.preventDefault();
             const u = document.getElementById("login-username").value.trim();
             const p = document.getElementById("login-password").value;
-            const creds = getAuthCredentials();
             const errBox = document.getElementById("login-error-msg");
 
-            if (u === creds.username && p === creds.password) {
+            const matchedUser = usersList.find(usr => usr.username === u && usr.password === p);
+            if (matchedUser) {
                 errBox.classList.add("hidden");
-                sessionStorage.setItem(SESSION_KEY, "true");
+                sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(matchedUser));
                 checkLoginSession();
-                showToast("เข้าสู่ระบบออนไลน์เรียบร้อยแล้ว", "success");
+                showToast(`ยินดีต้อนรับคุณ ${matchedUser.fullName}`, "success");
             } else {
                 errBox.classList.remove("hidden");
             }
         }
 
         function logoutSystem() {
-            sessionStorage.removeItem(SESSION_KEY);
+            sessionStorage.removeItem(SESSION_USER_KEY);
             document.getElementById("login-password").value = "";
             checkLoginSession();
             showToast("ออกจากระบบเรียบร้อยแล้ว", "info");
@@ -945,8 +1053,10 @@
         }
 
         function openChangePasswordModal() {
-            const creds = getAuthCredentials();
-            document.getElementById("cfg-username").value = creds.username;
+            const currentUser = getCurrentSessionUser();
+            const targetUser = currentUser || usersList[0] || getDefaultUsers()[0];
+            document.getElementById("cfg-username").value = targetUser.username;
+            document.getElementById("cfg-fullname").value = targetUser.fullName;
             document.getElementById("cfg-old-pass").value = "";
             document.getElementById("cfg-new-pass").value = "";
             const modal = document.getElementById("change-password-modal");
@@ -962,30 +1072,170 @@
 
         function handleChangePassword(e) {
             e.preventDefault();
-            const creds = getAuthCredentials();
-            const newUser = document.getElementById("cfg-username").value.trim();
+            const targetUsername = document.getElementById("cfg-username").value.trim();
+            const newFullName = document.getElementById("cfg-fullname").value.trim();
             const oldPass = document.getElementById("cfg-old-pass").value;
             const newPass = document.getElementById("cfg-new-pass").value;
 
-            if (oldPass !== creds.password) {
+            const idx = usersList.findIndex(u => u.username === targetUsername);
+            if (idx === -1) {
+                showToast("ไม่พบบัญชีผู้ใช้งานนี้ในระบบ", "error");
+                return;
+            }
+            if (oldPass !== usersList[idx].password) {
                 showToast("รหัสผ่านเดิมไม่ถูกต้อง", "error");
                 return;
             }
-            if (!newUser || !newPass) {
-                showToast("กรุณากรอกชื่อผู้ใช้งานและรหัสผ่านใหม่ให้ครบถ้วน", "warning");
+            usersList[idx].password = newPass;
+            usersList[idx].fullName = newFullName || usersList[idx].fullName;
+
+            const currentUser = getCurrentSessionUser();
+            if (currentUser && currentUser.username === targetUsername) {
+                sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(usersList[idx]));
+                checkLoginSession();
+            }
+
+            window.saveDatabase();
+            renderUsersTable();
+            closeChangePasswordModal();
+            showToast("อัปเดตรหัสผ่านและข้อมูลส่วนตัวขึ้น Cloud เรียบร้อยแล้ว", "success");
+        }
+
+        // ==================== USER MANAGEMENT FUNCTIONS ====================
+        function renderUsersTable() {
+            const tbody = document.getElementById("users-table-body");
+            if (!tbody) return;
+            const currentUser = getCurrentSessionUser();
+
+            tbody.innerHTML = usersList.map(u => {
+                const isSelf = currentUser && currentUser.username === u.username;
+                return `
+                    <tr class="hover:bg-sky-50/40 transition">
+                        <td class="py-3 px-4 font-mono font-bold text-dms-800">
+                            ${u.username}
+                            ${isSelf ? '<span class="ml-1.5 px-1.5 py-0.5 text-[10px] rounded bg-emerald-100 text-emerald-800 font-sans">กำลังใช้งาน</span>' : ''}
+                        </td>
+                        <td class="py-3 px-4 font-medium text-slate-800">${u.fullName}</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-0.5 rounded text-xs font-semibold ${u.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-sky-100 text-sky-800'}">
+                                ${u.role === 'admin' ? 'ผู้ดูแลระบบ (Admin)' : 'เจ้าหน้าที่ปฏิบัติงาน'}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 font-mono text-xs text-slate-500">${u.password}</td>
+                        <td class="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+                            <button onclick="openUserModal('${u.id}')" class="px-2.5 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 rounded text-xs font-medium transition">
+                                <i class="fa-solid fa-pen"></i> แก้ไข
+                            </button>
+                            ${usersList.length > 1 ? `
+                                <button onclick="deleteUserAccount('${u.id}')" class="px-2.5 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded text-xs font-medium transition">
+                                    <i class="fa-solid fa-trash"></i> ลบ
+                                </button>
+                            ` : ''}
+                        </td>
+                    </tr>
+                `;
+            }).join("");
+        }
+
+        function openUserModal(userId = null) {
+            const modal = document.getElementById("user-form-modal");
+            if (userId) {
+                const u = usersList.find(x => x.id === userId);
+                if (!u) return;
+                document.getElementById("user-modal-title").innerHTML = `<i class="fa-solid fa-user-pen text-teal-300 mr-1.5"></i>แก้ไขบัญชีผู้ใช้งาน: ${u.username}`;
+                document.getElementById("edit-user-id").value = u.id;
+                document.getElementById("usr-username").value = u.username;
+                document.getElementById("usr-password").value = u.password;
+                document.getElementById("usr-fullname").value = u.fullName;
+                document.getElementById("usr-role").value = u.role || "staff";
+            } else {
+                document.getElementById("user-modal-title").innerHTML = `<i class="fa-solid fa-user-plus text-teal-300 mr-1.5"></i>เพิ่มบัญชีผู้ใช้งานใหม่`;
+                document.getElementById("edit-user-id").value = "";
+                document.getElementById("usr-username").value = "";
+                document.getElementById("usr-password").value = "";
+                document.getElementById("usr-fullname").value = "";
+                document.getElementById("usr-role").value = "staff";
+            }
+            modal.classList.remove("hidden");
+            modal.classList.add("flex");
+        }
+
+        function closeUserModal() {
+            const modal = document.getElementById("user-form-modal");
+            modal.classList.add("hidden");
+            modal.classList.remove("flex");
+        }
+
+        function handleUserFormSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById("edit-user-id").value;
+            const username = document.getElementById("usr-username").value.trim();
+            const password = document.getElementById("usr-password").value.trim();
+            const fullName = document.getElementById("usr-fullname").value.trim();
+            const role = document.getElementById("usr-role").value;
+
+            if (!username || !password || !fullName) {
+                showToast("กรุณากรอกข้อมูลให้ครบทุกช่อง", "warning");
                 return;
             }
-            localStorage.setItem(AUTH_KEY, JSON.stringify({ username: newUser, password: newPass }));
-            document.getElementById("login-username").value = newUser;
-            closeChangePasswordModal();
-            showToast("เปลี่ยนชื่อผู้ใช้งานและรหัสผ่านเรียบร้อยแล้ว", "success");
+
+            const duplicate = usersList.find(u => u.username.toLowerCase() === username.toLowerCase() && u.id !== editId);
+            if (duplicate) {
+                showToast(`ชื่อผู้ใช้งาน "${username}" มีอยู่ในระบบแล้ว`, "error");
+                return;
+            }
+
+            if (editId) {
+                const idx = usersList.findIndex(u => u.id === editId);
+                if (idx !== -1) {
+                    usersList[idx] = { ...usersList[idx], username, password, fullName, role };
+                    const currentUser = getCurrentSessionUser();
+                    if (currentUser && currentUser.id === editId) {
+                        sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(usersList[idx]));
+                        checkLoginSession();
+                    }
+                    showToast(`แก้ไขบัญชีผู้ใช้งาน "${username}" สำเร็จ`, "success");
+                }
+            } else {
+                usersList.push({
+                    id: "USR-" + Date.now(),
+                    username,
+                    password,
+                    fullName,
+                    role
+                });
+                showToast(`เพิ่มบัญชีผู้ใช้งาน "${username}" ขึ้น Cloud สำเร็จ`, "success");
+            }
+
+            window.saveDatabase();
+            renderUsersTable();
+            closeUserModal();
+        }
+
+        function deleteUserAccount(userId) {
+            const u = usersList.find(x => x.id === userId);
+            if (!u) return;
+            if (usersList.length <= 1) {
+                showToast("ไม่สามารถลบบัญชีสุดท้ายของระบบได้", "warning");
+                return;
+            }
+            openConfirmModal(
+                "ยืนยันการลบบัญชีผู้ใช้งาน",
+                `คุณต้องการลบบัญชี "${u.username} (${u.fullName})" ออกจากระบบใช่หรือไม่?`,
+                () => {
+                    usersList = usersList.filter(x => x.id !== userId);
+                    window.saveDatabase();
+                    renderUsersTable();
+                    showToast(`ลบบัญชี "${u.username}" เรียบร้อยแล้ว`, "info");
+                }
+            );
         }
 
         function getInitialSampleProjects() {
             return [
                 {
                     id: "PRJ-1001",
-                    code: "1069001",
+                    code: "1169001",
                     fiscalYear: "2569",
                     name: "โครงการพัฒนาระบบเชื่อมโยงข้อมูลสุขภาพและประวัติการรักษาผู้ป่วยเฉพาะทาง (DMS Health Link)",
                     agency: "สถาบันสุขภาพเด็กแห่งชาติมหาราชินี",
@@ -993,18 +1243,18 @@
                     budgetType: "งบลงทุน (ครุภัณฑ์/สิ่งก่อสร้าง)",
                     criteriaType: "ตรงเกณฑ์",
                     docNo: "สธ 0310.04/1124",
-                    receivedDate: "2026-10-05",
-                    meetingDate: "2026-10-14",
+                    receivedDate: "2026-11-05",
+                    meetingDate: "2026-11-12",
                     currentStep: "6",
-                    submittedSignDate: "2026-10-24",
-                    signedDate: "2026-10-28",
-                    returnedDate: "2026-10-30",
+                    submittedSignDate: "2026-11-15",
+                    signedDate: "2026-11-17",
+                    returnedDate: "2026-11-18",
                     rejectionReason: "",
-                    note: "ขอรับการพิจารณามาตรฐานความมั่นคงปลอดภัยไซเบอร์",
+                    note: "ขอรับการพิจารณามาตรฐานความมั่นคงปลอดภัยไซเบอร์และสถาปัตยกรรมระบบ",
                     logs: [
-                        { timestamp: "2026-10-05 09:30", actionDate: "2026-10-05", step: "1", stepLabel: "1. รับเรื่องเข้า", operator: "เจ้าหน้าที่สารบรรณ", remark: "รับหนังสือจากสถาบันสุขภาพเด็กฯ ลงทะเบียนรับเรียบร้อย" },
-                        { timestamp: "2026-10-14 13:30", actionDate: "2026-10-14", step: "2", stepLabel: "2. ประชุมพิจารณา", operator: "นักวิชาการคอมพิวเตอร์", remark: "คณะกรรมการประชุมพิจารณาเห็นชอบตามเกณฑ์" },
-                        { timestamp: "2026-10-30 13:45", actionDate: "2026-10-30", step: "6", stepLabel: "6. แจ้งผลพิจารณาและส่งคืนหน่วยงาน", operator: "เจ้าหน้าที่สารบรรณ", remark: "แจ้งผลการพิจารณาและส่งคืนเรื่องให้สถาบันสุขภาพเด็กฯ" }
+                        { timestamp: "2026-11-05 09:30", actionDate: "2026-11-05", step: "1", stepLabel: "1. รับเรื่องเข้า", operator: "เจ้าหน้าที่สารบรรณ", remark: "ลงทะเบียนรับเรื่องเข้าสำนักดิจิทัลการแพทย์" },
+                        { timestamp: "2026-11-12 14:00", actionDate: "2026-11-12", step: "2", stepLabel: "2. ประชุมพิจารณา", operator: "ผู้ดูแลระบบ (Admin สำนักดิจิทัลการแพทย์)", remark: "ผ่านการประชุมพิจารณาเห็นชอบโครงการ (วันที่ประชุมพิจารณา: 12 พ.ย. 2569)" },
+                        { timestamp: "2026-11-18 11:20", actionDate: "2026-11-18", step: "6", stepLabel: "6. แจ้งผลพิจารณาและส่งคืนหน่วยงาน", operator: "ผู้ดูแลระบบ (Admin สำนักดิจิทัลการแพทย์)", remark: "ออกหนังสือแจ้งผลและส่งคืนหน่วยงานเรียบร้อยแล้ว (วันที่ส่งคืนหน่วยงาน: 18 พ.ย. 2569)" }
                     ]
                 },
                 {
@@ -1017,55 +1267,24 @@
                     budgetType: "งบดำเนินงาน",
                     criteriaType: "ตรงเกณฑ์",
                     docNo: "สธ 0312/892",
-                    receivedDate: "2026-11-02",
-                    meetingDate: "2026-11-10",
-                    currentStep: "3",
-                    submittedSignDate: "",
+                    receivedDate: "2026-11-10",
+                    meetingDate: "2026-11-16",
+                    currentStep: "4",
+                    submittedSignDate: "2026-11-18",
                     signedDate: "",
                     returnedDate: "",
                     rejectionReason: "",
                     note: "โครงการงบดำเนินงานประจำปี 2569",
                     logs: [
-                        { timestamp: "2026-11-02 10:15", actionDate: "2026-11-02", step: "1", stepLabel: "1. รับเรื่องเข้า", operator: "เจ้าหน้าที่สารบรรณ", remark: "รับเรื่องเข้าระบบ" },
-                        { timestamp: "2026-11-10 14:00", actionDate: "2026-11-10", step: "2", stepLabel: "2. ประชุมพิจารณา", operator: "นักวิชาการคอมพิวเตอร์", remark: "ประชุมพิจารณาผ่านเกณฑ์เรียบร้อย" }
+                        { timestamp: "2026-11-10 10:15", actionDate: "2026-11-10", step: "1", stepLabel: "1. รับเรื่องเข้า", operator: "เจ้าหน้าที่สารบรรณ", remark: "ลงทะเบียนรับเรื่องเข้าระบบ" },
+                        { timestamp: "2026-11-18 14:30", actionDate: "2026-11-18", step: "4", stepLabel: "4. เสนอผู้บริหารพิจารณาลงนาม", operator: "นักวิชาการคอมพิวเตอร์ปฏิบัติการ", remark: "เสนอผู้บริหารพิจารณาลงนาม (วันที่เสนอเซ็น: 18 พ.ย. 2569)" }
                     ]
                 }
             ];
         }
 
-        window.initRealtimeSync = function() {
-            if (!window.db || !window.auth) return;
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'dms-project-tracking-prod';
-            
-            import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js").then(({ doc, setDoc, getDoc, onSnapshot }) => {
-                // FIXED 4-SEGMENT PATH: artifacts/{appId}/public_data/projects_store
-                const projectsDocRef = doc(window.db, 'artifacts', appId, 'public_data', 'projects_store');
-                
-                getDoc(projectsDocRef).then((docSnap) => {
-                    if (!docSnap.exists() || !docSnap.data().projects) {
-                        const initial = getInitialSampleProjects();
-                        setDoc(projectsDocRef, { projects: initial }).catch(err => console.log("Init setDoc error:", err));
-                    }
-                }).catch(err => console.log("getDoc error:", err));
-
-                onSnapshot(projectsDocRef, (docSnap) => {
-                    if (docSnap.exists() && docSnap.data().projects) {
-                        projects = docSnap.data().projects;
-                        saveDatabaseLocalFallback();
-                        renderAll();
-                        const badge = document.getElementById("cloud-sync-badge");
-                        if (badge) badge.innerHTML = `<i class="fa-solid fa-circle text-[6px] text-emerald-400"></i> ซิงค์ Cloud เรียบร้อย`;
-                    }
-                }, (error) => {
-                    console.warn("Firestore listener warning, using local state:", error);
-                    const badge = document.getElementById("cloud-sync-badge");
-                    if (badge) badge.innerHTML = `<i class="fa-solid fa-circle text-[6px] text-amber-400"></i> โหมดบันทึกในเครื่อง (Offline Mode)`;
-                    loadDatabaseLocalFallback();
-                });
-            });
-        };
-
         function loadDatabaseLocalFallback() {
+            loadUsersLocalFallback();
             try {
                 const raw = localStorage.getItem(STORAGE_KEY);
                 if (raw) {
@@ -1088,13 +1307,14 @@
 
         window.saveDatabase = function() {
             saveDatabaseLocalFallback();
+            saveUsersLocalFallback();
             if (window.db && window.isFirebaseReady) {
                 const appId = typeof __app_id !== 'undefined' ? __app_id : 'dms-project-tracking-prod-v2';
                 import("https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js").then(({ doc, setDoc }) => {
-                    // FIXED 4-SEGMENT PATH: artifacts/{appId}/public_data/projects_store
-                    const projectsDocRef = doc(window.db, 'artifacts', appId, 'public_data', 'projects_store');
-                    setDoc(projectsDocRef, { projects: projects }).catch(err => {
-                        console.error("Cloud save failed:", err);
+                    // FIXED PUBLIC DATA PATH: artifacts/{appId}/public/data/projects/projects_store
+                    const projectsDocRef = doc(window.db, 'artifacts', appId, 'public', 'data', 'projects', 'projects_store');
+                    setDoc(projectsDocRef, { projects: projects, users: usersList }).catch(err => {
+                        console.warn("Cloud sync skipped (using local storage):", err.message);
                     });
                 });
             }
@@ -1102,8 +1322,8 @@
         };
 
         window.onload = function () {
+            loadUsersLocalFallback();
             checkLoginSession();
-            loadOperatorName();
             startClock();
             setTimeout(() => {
                 if (!projects || projects.length === 0) {
@@ -1112,19 +1332,10 @@
             }, 1200);
         };
 
-        function loadOperatorName() {
-            const saved = localStorage.getItem("DMS_OPERATOR_NAME_V1");
-            if (saved) {
-                document.getElementById("operator-name").value = saved;
-                document.getElementById("status-bar-operator").textContent = "ผู้ปฏิบัติงาน: " + saved;
-            }
-        }
-
         function saveOperatorName(val) {
-            const name = val.trim() || "นักวิชาการคอมพิวเตอร์ปฏิบัติการ";
-            localStorage.setItem("DMS_OPERATOR_NAME_V1", name);
+            const name = val.trim() || "ผู้ปฏิบัติงานออนไลน์";
             document.getElementById("status-bar-operator").textContent = "ผู้ปฏิบัติงาน: " + name;
-            showToast("บันทึกชื่อผู้ปฏิบัติงานเป็น: " + name, "success");
+            showToast("อัปเดตชื่อผู้ปฏิบัติงานเป็น: " + name, "success");
         }
 
         function getOperator() {
@@ -1135,12 +1346,15 @@
             renderDashboard();
             renderProjectTable();
             renderGlobalAuditLog();
+            renderUsersTable();
             updateStatusBar();
         }
 
         function updateStatusBar() {
-            document.getElementById("nav-count-badge").textContent = projects.length;
-            document.getElementById("status-bar-count").textContent = `โครงการทั้งหมดบน Cloud: ${projects.length} รายการ`;
+            const navBadge = document.getElementById("nav-count-badge");
+            const barCount = document.getElementById("status-bar-count");
+            if (navBadge) navBadge.textContent = projects.length;
+            if (barCount) barCount.textContent = `โครงการทั้งหมดบน Cloud: ${projects.length} รายการ`;
         }
 
         function switchTab(tabId) {
@@ -1161,6 +1375,7 @@
             if (tabId === "dashboard") renderDashboard();
             if (tabId === "registry") renderProjectTable();
             if (tabId === "audit") renderGlobalAuditLog();
+            if (tabId === "users") renderUsersTable();
         }
 
         function renderDashboard() {
@@ -1208,7 +1423,7 @@
             const urgentContainer = document.getElementById("urgent-projects-list");
             const activeProjects = filtered.filter(p => p.currentStep !== "6" && p.currentStep !== "REJECTED").slice(0, 4);
             if (activeProjects.length === 0) {
-                urgentContainer.innerHTML = `<div class="text-xs text-slate-400 py-4 text-center">ไม่มีโครงการค้างดำเนินการบน Cloud</div>`;
+                urgentContainer.innerHTML = `<div class="text-xs text-slate-400 py-4 text-center">ไม่มีโครงการค้างดำเนินการในขณะนี้</div>`;
             } else {
                 urgentContainer.innerHTML = activeProjects.map(p => {
                     const stepObj = getStepInfo(p.currentStep);
@@ -1255,7 +1470,7 @@
 
         function renderProjectTable() {
             const q = document.getElementById("search-input").value.trim().toLowerCase();
-            const meetDateFilter = document.getElementById("meeting-date-filter").value;
+            const meetingDateFilter = document.getElementById("meeting-date-filter").value;
             const statusFilter = document.getElementById("status-filter").value;
             const yearFilter = document.getElementById("year-filter").value;
 
@@ -1264,10 +1479,9 @@
                     p.code.toLowerCase().includes(q) ||
                     p.name.toLowerCase().includes(q) ||
                     p.agency.toLowerCase().includes(q) ||
-                    (p.budgetType && p.budgetType.toLowerCase().includes(q)) ||
-                    (p.criteriaType && p.criteriaType.toLowerCase().includes(q));
+                    (p.budgetType && p.budgetType.toLowerCase().includes(q));
 
-                const matchMeetingDate = !meetDateFilter || p.meetingDate === meetDateFilter;
+                const matchMeetingDate = !meetingDateFilter || p.meetingDate === meetingDateFilter;
 
                 let matchStatus = true;
                 if (statusFilter === "ACTIVE") {
@@ -1293,7 +1507,7 @@
             tbody.innerHTML = filtered.map(p => {
                 const stepObj = getStepInfo(p.currentStep);
                 const progressPct = p.currentStep === "REJECTED" ? 100 : Math.round((parseInt(p.currentStep) / 6) * 100);
-                const isMeet = p.criteriaType !== "ไม่ตรงเกณฑ์";
+                const isMeetCriteria = p.criteriaType === "ตรงเกณฑ์";
 
                 return `
                     <tr class="hover:bg-sky-50/50 transition group">
@@ -1305,13 +1519,22 @@
                             <div onclick="openDetailModal('${p.id}')" class="font-semibold text-slate-800 hover:text-dms-700 cursor-pointer leading-snug">
                                 ${p.name}
                             </div>
-                            <div class="flex flex-wrap items-center gap-1.5 mt-1.5 text-xs">
-                                <span class="text-slate-500 mr-1"><i class="fa-regular fa-building mr-1 text-slate-400"></i>${p.agency}</span>
-                                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px] font-medium border border-slate-200">${p.budgetType || 'ไม่ระบุประเภทงบฯ'}</span>
-                                <span class="px-2 py-0.5 rounded text-[11px] font-semibold border ${isMeet ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-amber-50 text-amber-700 border-amber-200'}">
+                            <div class="text-xs text-slate-500 mt-1">
+                                <i class="fa-regular fa-building mr-1 text-slate-400"></i>${p.agency}
+                            </div>
+                            <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-medium">
+                                    ${p.budgetType || 'ไม่ระบุประเภทงบ'}
+                                </span>
+                                <span class="px-2 py-0.5 rounded text-[11px] font-semibold border ${isMeetCriteria ? 'bg-teal-50 text-teal-800 border-teal-200' : 'bg-amber-50 text-amber-800 border-amber-200'}">
                                     ${p.criteriaType || 'ตรงเกณฑ์'}
                                 </span>
                             </div>
+                            ${p.currentStep === 'REJECTED' && p.rejectionReason ? `
+                                <div class="mt-1.5 text-[11px] text-rose-700 bg-rose-50 px-2 py-1 rounded border border-rose-200">
+                                    <strong>เหตุผล:</strong> ${p.rejectionReason}
+                                </div>
+                            ` : ''}
                         </td>
                         <td class="py-3.5 px-4 align-top whitespace-nowrap text-xs text-slate-700">
                             <div class="font-medium">${formatThaiDate(p.receivedDate)}</div>
@@ -1322,13 +1545,11 @@
                                 ${p.currentStep === 'REJECTED' ? '<i class="fa-solid fa-ban"></i>' : `<span class="font-bold">${p.currentStep}/6</span>`}
                                 ${stepObj.short}
                             </span>
-                            <div class="mt-1.5 text-[11px] text-slate-600 flex items-center gap-1">
-                                <i class="fa-regular fa-calendar-check text-blue-600"></i>
-                                <span>วันประชุม:</span>
-                                <strong class="${p.meetingDate ? 'text-blue-700' : 'text-slate-400 font-normal'}">${p.meetingDate ? formatThaiDate(p.meetingDate) : 'ยังไม่กำหนด'}</strong>
-                            </div>
-                            <div class="w-full max-w-[200px] h-1.5 bg-slate-100 rounded-full mt-1.5 overflow-hidden">
+                            <div class="w-full max-w-[210px] h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden">
                                 <div class="${stepObj.color} h-full rounded-full" style="width: ${progressPct}%"></div>
+                            </div>
+                            <div class="mt-1.5 text-[11px] ${p.meetingDate ? 'text-blue-700 font-medium' : 'text-slate-400'}">
+                                <i class="fa-regular fa-calendar-check mr-1"></i>วันประชุมพิจารณา: ${p.meetingDate ? formatThaiDate(p.meetingDate) : 'ยังไม่ระบุ'}
                             </div>
                         </td>
                         <td class="py-3.5 px-4 align-top text-xs space-y-1 whitespace-nowrap">
@@ -1363,31 +1584,31 @@
             renderProjectTable();
         }
 
-        function generateRegCodeFromDate(isoDate) {
-            const parts = (isoDate || new Date().toISOString().split("T")[0]).split("-");
-            const month = parts[1] || "01";
-            const yearBE2 = String((parseInt(parts[0], 10) || new Date().getFullYear()) + 543).slice(-2);
-            const prefix = `${month}${yearBE2}`;
-            const sameMonthCount = projects.filter(p => p.code && p.code.startsWith(prefix)).length;
-            const seq = String(sameMonthCount + 1).padStart(3, "0");
-            return `${prefix}${seq}`;
-        }
-
         function autoGenerateRegCode() {
             const editId = document.getElementById("edit-project-id").value;
             if (editId) return;
-            const recDate = document.getElementById("field-received-date").value;
-            document.getElementById("field-code").value = generateRegCodeFromDate(recDate);
+            const dateVal = document.getElementById("field-received-date").value;
+            let monthStr = "11";
+            let yearBEShort = "69";
+            if (dateVal && dateVal.split("-").length === 3) {
+                const parts = dateVal.split("-");
+                monthStr = parts[1];
+                yearBEShort = String(parseInt(parts[0], 10) + 543).slice(-2);
+            }
+            const prefix = `${monthStr}${yearBEShort}`;
+            const samePrefixCount = projects.filter(p => p.code && p.code.startsWith(prefix)).length;
+            const running = String(samePrefixCount + 1).padStart(3, "0");
+            document.getElementById("field-code").value = `${prefix}${running}`;
         }
 
         function openNewProjectModal() {
             document.getElementById("edit-project-id").value = "";
-            document.getElementById("form-modal-title").textContent = "ลงทะเบียนรับเรื่องโครงการใหม่ (Cloud)";
+            document.getElementById("form-modal-title").textContent = "ลงทะเบียนรับเรื่องโครงการใหม่";
             document.getElementById("project-form").reset();
 
             const today = new Date().toISOString().split("T")[0];
             document.getElementById("field-received-date").value = today;
-            document.getElementById("field-code").value = generateRegCodeFromDate(today);
+            autoGenerateRegCode();
 
             const modal = document.getElementById("project-form-modal");
             modal.classList.remove("hidden");
@@ -1457,14 +1678,14 @@
                     window.saveDatabase();
                     renderAll();
                     closeProjectFormModal();
-                    showToast("บันทึกการแก้ไขขึ้น Cloud สำเร็จ", "success");
+                    showToast("บันทึกการแก้ไขข้อมูลขึ้น Cloud เรียบร้อยแล้ว", "success");
                 }
             } else {
                 const newProject = {
                     id: "PRJ-" + Date.now(),
                     ...data,
-                    currentStep: "1",
                     meetingDate: "",
+                    currentStep: "1",
                     submittedSignDate: "",
                     signedDate: "",
                     returnedDate: "",
@@ -1484,7 +1705,7 @@
                 window.saveDatabase();
                 renderAll();
                 closeProjectFormModal();
-                showToast("บันทึกโครงการใหม่ขึ้น Cloud สำเร็จ: " + newProject.code, "success");
+                showToast("ลงทะเบียนโครงการใหม่ขึ้น Cloud สำเร็จ: " + newProject.code, "success");
             }
         }
 
@@ -1498,9 +1719,9 @@
             document.getElementById("detail-agency").textContent = p.agency;
             document.getElementById("detail-budget").textContent = `${Number(p.budget || 0).toLocaleString()} บาท (${p.budgetType || '-'})`;
 
-            const criteriaEl = document.getElementById("detail-criteria-type");
-            criteriaEl.textContent = p.criteriaType || "ตรงเกณฑ์";
-            criteriaEl.className = `font-semibold ${p.criteriaType === 'ไม่ตรงเกณฑ์' ? 'text-amber-700' : 'text-teal-700'}`;
+            const critEl = document.getElementById("detail-criteria-type");
+            critEl.textContent = p.criteriaType || "ตรงเกณฑ์";
+            critEl.className = `font-semibold ${p.criteriaType === 'ไม่ตรงเกณฑ์' ? 'text-amber-700' : 'text-teal-700'}`;
 
             document.getElementById("detail-received-date").textContent = formatThaiDate(p.receivedDate);
             document.getElementById("detail-meeting-date").textContent = p.meetingDate ? formatThaiDate(p.meetingDate) : "-";
@@ -1522,12 +1743,9 @@
                 rejBox.classList.add("hidden");
             }
 
+            // Keep current status selected (no auto-increment)
             const stepSelect = document.getElementById("update-step-select");
-            if (p.currentStep !== "REJECTED" && parseInt(p.currentStep) < 6) {
-                stepSelect.value = String(parseInt(p.currentStep) + 1);
-            } else {
-                stepSelect.value = p.currentStep;
-            }
+            stepSelect.value = p.currentStep;
 
             const today = new Date().toISOString().split("T")[0];
             document.getElementById("update-status-date").value = today;
@@ -1619,7 +1837,7 @@
             window.saveDatabase();
             renderAll();
             openDetailModal(p.id);
-            showToast(`อัปเดตสถานะเป็น "${stepObj.short}" บน Cloud สำเร็จ`, "success");
+            showToast(`อัปเดตสถานะเป็น "${stepObj.short}" ขึ้น Cloud เรียบร้อยแล้ว`, "success");
         }
 
         function renderProjectTimeline(p) {
@@ -1653,13 +1871,13 @@
             if (!p) return;
             openConfirmModal(
                 "ยืนยันการลบโครงการ",
-                `คุณต้องการลบโครงการ "${p.code} - ${p.name}" ออกจาก Cloud ใช่หรือไม่?`,
+                `คุณต้องการลบโครงการ "${p.code} - ${p.name}" ออกจากระบบ Cloud ใช่หรือไม่?`,
                 () => {
                     projects = projects.filter(x => x.id !== p.id);
                     window.saveDatabase();
                     renderAll();
                     closeDetailModal();
-                    showToast("ลบโครงการออกจากระบบแล้ว", "info");
+                    showToast("ลบโครงการออกจาก Cloud แล้ว", "info");
                 }
             );
         }
