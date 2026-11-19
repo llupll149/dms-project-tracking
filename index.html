@@ -151,7 +151,10 @@
                     <span class="hidden md:inline text-sky-200/80">|</span>
                     <span class="hidden md:inline text-sky-100/90 text-xs">ระบบบริหารและติดตามโครงการออนไลน์ • สำนักดิจิทัลการแพทย์ กรมการแพทย์</span>
                 </div>
-                <span id="cloud-sync-badge" class="ml-2 px-2 py-0.5 text-[10px] font-medium bg-emerald-400/20 text-emerald-200 border border-emerald-300/30 rounded-full flex items-center gap-1">
+                <span id="role-header-badge" class="ml-1 px-2 py-0.5 text-[10px] font-semibold bg-white/15 text-sky-100 border border-white/25 rounded-full">
+                    <i class="fa-solid fa-shield-halved mr-1"></i> Role
+                </span>
+                <span id="cloud-sync-badge" class="ml-1 px-2 py-0.5 text-[10px] font-medium bg-emerald-400/20 text-emerald-200 border border-emerald-300/30 rounded-full flex items-center gap-1">
                     <i class="fa-solid fa-circle text-[6px] text-emerald-400 animate-pulse"></i> เชื่อมต่อ Cloud แล้ว
                 </span>
             </div>
@@ -207,7 +210,7 @@
                             <i class="fa-solid fa-database w-5 text-center text-slate-500"></i>
                             <span class="hidden md:inline font-display">ส่งออก Excel & สำรองข้อมูล</span>
                         </button>
-                        <button onclick="switchTab('users')" data-tab="users" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-all">
+                        <button id="nav-btn-users" onclick="switchTab('users')" data-tab="users" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-all">
                             <i class="fa-solid fa-users-gear w-5 text-center text-slate-500"></i>
                             <span class="hidden md:inline font-display">จัดการบัญชีผู้ใช้งาน</span>
                         </button>
@@ -217,7 +220,10 @@
                 <!-- Operator Profile & Quick Export -->
                 <div class="p-3 border-t border-slate-200 bg-slate-50/80">
                     <div class="hidden md:block mb-2.5">
-                        <label class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block mb-1">ผู้ปฏิบัติงานออนไลน์</label>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">ผู้ปฏิบัติงานออนไลน์</label>
+                            <span id="sidebar-role-tag" class="text-[10px] px-1.5 py-0.2 rounded font-semibold bg-dms-100 text-dms-800">Admin</span>
+                        </div>
                         <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5">
                             <i class="fa-solid fa-user-tie text-dms-600 text-xs"></i>
                             <input type="text" id="operator-name" value="นักวิชาการคอมพิวเตอร์ปฏิบัติการ" onchange="saveOperatorName(this.value)" class="w-full text-xs text-slate-700 font-medium focus:outline-none bg-transparent">
@@ -475,14 +481,14 @@
                             </button>
                         </div>
 
-                        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                        <div id="backup-json-card" class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
                             <div>
                                 <div class="w-12 h-12 rounded-xl bg-dms-50 text-dms-600 flex items-center justify-center text-2xl mb-4 border border-dms-100">
                                     <i class="fa-solid fa-cloud-arrow-down"></i>
                                 </div>
                                 <h3 class="font-bold text-slate-800 text-base">สำรองฐานข้อมูล Cloud (JSON Backup)</h3>
                                 <p class="text-xs text-slate-500 mt-2 leading-relaxed">
-                                    ดาวน์โหลดข้อมูลโครงการทั้งหมดจาก Cloud เก็บไว้เป็นไฟล์สำรองส่วนตัวในเครื่องคอมพิวเตอร์เพื่อความปลอดภัยสูงสุด
+                                    ดาวน์โหลดข้อมูลโครงการทั้งหมดจาก Cloud เก็บไว้เป็นไฟล์สำรองส่วนตัวในเครื่องคอมพิวเตอร์เพื่อความปลอดภัยสูงสุด (เฉพาะ Admin)
                                 </p>
                             </div>
                             <button onclick="backupDatabase()" class="mt-6 w-full py-2.5 px-4 bg-dms-600 hover:bg-dms-700 text-white rounded-lg text-sm font-display font-medium flex items-center justify-center gap-2 shadow-sm transition">
@@ -641,7 +647,7 @@
                     <h3 id="detail-project-title" class="font-display font-semibold text-sm sm:text-base truncate">ชื่อโครงการ</h3>
                 </div>
                 <div class="flex items-center gap-2 shrink-0">
-                    <button onclick="openEditFromDetail()" class="px-3 py-1 bg-white/15 hover:bg-white/25 rounded text-xs font-medium transition">
+                    <button id="btn-edit-main-project" onclick="openEditFromDetail()" class="px-3 py-1 bg-white/15 hover:bg-white/25 rounded text-xs font-medium transition">
                         <i class="fa-solid fa-pen-to-square mr-1"></i> แก้ไขข้อมูลหลัก
                     </button>
                     <button onclick="closeDetailModal()" class="text-slate-300 hover:text-white ml-1 transition">
@@ -759,9 +765,14 @@
                         </div>
 
                         <div class="flex items-center justify-between pt-2">
-                            <button type="button" onclick="deleteCurrentProject()" class="text-xs text-rose-600 hover:text-rose-800 font-medium flex items-center gap-1">
-                                <i class="fa-solid fa-trash-can"></i> ลบโครงการนี้
-                            </button>
+                            <div>
+                                <button id="btn-delete-project" type="button" onclick="deleteCurrentProject()" class="text-xs text-rose-600 hover:text-rose-800 font-medium flex items-center gap-1">
+                                    <i class="fa-solid fa-trash-can"></i> ลบโครงการนี้
+                                </button>
+                                <span id="staff-delete-hint" class="hidden text-[11px] text-slate-400">
+                                    <i class="fa-solid fa-lock mr-1"></i>เฉพาะ Admin ที่แก้ไขข้อมูลหลักหรือลบโครงการได้
+                                </span>
+                            </div>
                             <button type="button" onclick="saveWorkflowUpdate()" class="px-5 py-2 bg-dms-600 hover:bg-dms-700 text-white rounded-lg text-sm font-display font-medium shadow-sm transition flex items-center gap-2">
                                 <i class="fa-solid fa-check-circle"></i> บันทึกความคืบหน้าขึ้น Cloud
                             </button>
@@ -1005,6 +1016,64 @@
             return null;
         }
 
+        function isCurrentUserAdmin() {
+            const u = getCurrentSessionUser();
+            return u && u.role === "admin";
+        }
+
+        function applyRolePermissions() {
+            const isAdmin = isCurrentUserAdmin();
+            const currentUser = getCurrentSessionUser();
+
+            // 1. Header & Sidebar Role Badges
+            const headerBadge = document.getElementById("role-header-badge");
+            const sidebarTag = document.getElementById("sidebar-role-tag");
+            const operatorInput = document.getElementById("operator-name");
+
+            if (headerBadge && currentUser) {
+                if (isAdmin) {
+                    headerBadge.className = "ml-1 px-2 py-0.5 text-[10px] font-semibold bg-purple-500/30 text-purple-100 border border-purple-300/40 rounded-full";
+                    headerBadge.innerHTML = `<i class="fa-solid fa-crown text-amber-300 mr-1"></i> ผู้ดูแลระบบ (Admin)`;
+                } else {
+                    headerBadge.className = "ml-1 px-2 py-0.5 text-[10px] font-semibold bg-sky-500/30 text-sky-100 border border-sky-300/40 rounded-full";
+                    headerBadge.innerHTML = `<i class="fa-solid fa-user-check text-teal-200 mr-1"></i> เจ้าหน้าที่ (Staff)`;
+                }
+            }
+
+            if (sidebarTag) {
+                sidebarTag.textContent = isAdmin ? "Admin" : "Staff";
+                sidebarTag.className = `text-[10px] px-1.5 py-0.2 rounded font-semibold ${isAdmin ? 'bg-purple-100 text-purple-800' : 'bg-sky-100 text-sky-800'}`;
+            }
+
+            // Staff cannot spoof operator display name; locked to their registered account name
+            if (operatorInput) {
+                operatorInput.readOnly = !isAdmin;
+                operatorInput.classList.toggle("text-slate-500", !isAdmin);
+                operatorInput.title = isAdmin ? "แก้ไขชื่อผู้บันทึกได้" : "ชื่อผู้ปฏิบัติงานผูกกับบัญชี Staff อัตโนมัติ";
+            }
+
+            // 2. Navigation Menu: Hide User Management from Staff
+            const navUsersBtn = document.getElementById("nav-btn-users");
+            if (navUsersBtn) {
+                navUsersBtn.classList.toggle("hidden", !isAdmin);
+            }
+
+            // 3. Backup Card: Only Admin can download full JSON database backup
+            const backupJsonCard = document.getElementById("backup-json-card");
+            if (backupJsonCard) {
+                backupJsonCard.classList.toggle("hidden", !isAdmin);
+            }
+
+            // 4. Detail Modal Controls: Edit Main Info & Delete Project
+            const btnEditMain = document.getElementById("btn-edit-main-project");
+            const btnDeleteProj = document.getElementById("btn-delete-project");
+            const staffHint = document.getElementById("staff-delete-hint");
+
+            if (btnEditMain) btnEditMain.classList.toggle("hidden", !isAdmin);
+            if (btnDeleteProj) btnDeleteProj.classList.toggle("hidden", !isAdmin);
+            if (staffHint) staffHint.classList.toggle("hidden", isAdmin);
+        }
+
         function checkLoginSession() {
             const currentUser = getCurrentSessionUser();
             const loginScreen = document.getElementById("login-screen");
@@ -1015,7 +1084,9 @@
                 mainWindow.classList.remove("hidden");
                 mainWindow.classList.add("flex");
                 document.getElementById("operator-name").value = currentUser.fullName;
-                document.getElementById("status-bar-operator").textContent = `ผู้ปฏิบัติงาน: ${currentUser.fullName} (${currentUser.username})`;
+                const roleText = currentUser.role === "admin" ? "Admin" : "Staff";
+                document.getElementById("status-bar-operator").textContent = `ผู้ปฏิบัติงาน: ${currentUser.fullName} [${roleText}]`;
+                applyRolePermissions();
             } else {
                 loginScreen.classList.remove("hidden");
                 mainWindow.classList.add("hidden");
@@ -1358,6 +1429,10 @@
         }
 
         function switchTab(tabId) {
+            if (tabId === "users" && !isCurrentUserAdmin()) {
+                showToast("เฉพาะผู้ดูแลระบบ (Admin) เท่านั้นที่เข้าถึงหน้าจัดการบัญชีผู้ใช้งานได้", "warning");
+                return;
+            }
             document.querySelectorAll(".tab-content").forEach(el => el.classList.add("hidden"));
             const target = document.getElementById("tab-" + tabId);
             if (target) target.classList.remove("hidden");
@@ -1616,6 +1691,10 @@
         }
 
         function openEditFromDetail() {
+            if (!isCurrentUserAdmin()) {
+                showToast("สิทธิ์ Staff ไม่สามารถแก้ไขข้อมูลหลักของโครงการได้ กรุณาติดต่อ Admin", "warning");
+                return;
+            }
             const p = projects.find(x => x.id === activeDetailProjectId);
             if (!p) return;
             closeDetailModal();
@@ -1647,6 +1726,10 @@
         function handleProjectFormSubmit(e) {
             e.preventDefault();
             const editId = document.getElementById("edit-project-id").value;
+            if (editId && !isCurrentUserAdmin()) {
+                showToast("สิทธิ์ Staff ไม่ได้รับอนุญาตให้แก้ไขข้อมูลหลักโครงการ", "error");
+                return;
+            }
             const nowStr = getCurrentTimestamp();
             const operator = getOperator();
 
@@ -1867,6 +1950,10 @@
         }
 
         function deleteCurrentProject() {
+            if (!isCurrentUserAdmin()) {
+                showToast("สิทธิ์ Staff ไม่สามารถลบโครงการออกจากระบบได้ กรุณาติดต่อ Admin", "error");
+                return;
+            }
             const p = projects.find(x => x.id === activeDetailProjectId);
             if (!p) return;
             openConfirmModal(
