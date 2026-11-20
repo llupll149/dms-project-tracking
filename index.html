@@ -90,4 +90,1724 @@
 <body class="min-h-screen flex items-center justify-center p-0 sm:p-3 md:p-4 bg-gradient-to-br from-[#eef2f5] via-[#eaf2f6] to-[#e7f1ee] text-slate-700">
 
     <!-- Toast Container -->
-    <div id="toast-container" class="fixed bottom-
+    <div id="toast-container" class="fixed bottom-6 right-6 z-[70] flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- ==================== LOGIN SCREEN ==================== -->
+    <div id="login-screen" class="fixed inset-0 z-50 bg-gradient-to-br from-[#dce8ef] via-[#e8eff3] to-[#dfece7] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-xl border border-slate-200/90 overflow-hidden animate-fade">
+            <div class="bg-gradient-to-r from-[#e6f0f7] via-[#edf5f8] to-[#e2f1ec] p-6 text-center border-b border-slate-200/80">
+                <img id="login-logo-img" src="" alt="โลโก้สำนักดิจิทัลการแพทย์ กรมการแพทย์" class="w-20 h-20 object-contain mx-auto mb-3 rounded-xl bg-white p-1.5 shadow-sm border border-slate-200/80">
+                <h2 class="font-display font-bold text-lg text-softsky-800">DMS Project Tracking Online</h2>
+                <p class="text-xs text-slate-600 mt-0.5">ระบบบริหารและติดตามโครงการ • สำนักดิจิทัลการแพทย์ กรมการแพทย์</p>
+                <span id="login-cloud-pill" class="inline-flex items-center gap-1.5 mt-2.5 px-3 py-0.5 rounded-full bg-white/80 text-[11px] text-softmint-700 border border-softmint-200 font-medium">
+                    <i class="fa-solid fa-circle text-[7px] text-emerald-500"></i> พร้อมซิงค์ข้อมูล
+                </span>
+            </div>
+
+            <form onsubmit="handleLogin(event)" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อผู้ใช้งาน (Username)</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" id="login-username" required autocomplete="off" placeholder="ระบุชื่อผู้ใช้งาน" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:bg-white focus:border-softsky-600">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1">
+                        <label class="block text-xs font-semibold text-slate-700">รหัสผ่าน (ตัวเลข 6 หลัก)</label>
+                        <button type="button" onclick="togglePasswordVisibility('login-password')" class="text-[11px] text-softsky-700 hover:underline">แสดง/ซ่อน</button>
+                    </div>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="password" id="login-password" required autocomplete="new-password" inputmode="numeric" maxlength="6" pattern="\d{6}" oninput="this.value = this.value.replace(/\D/g, '').slice(0,6)" placeholder="รหัสผ่านตัวเลข 6 หลัก" class="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono tracking-widest text-slate-800 focus:outline-none focus:bg-white focus:border-softsky-600">
+                    </div>
+                </div>
+
+                <div id="login-error-msg" class="hidden p-2.5 rounded-xl bg-softrose-50 border border-softrose-200 text-softrose-600 text-xs flex items-center gap-2">
+                    <i class="fa-solid fa-circle-exclamation shrink-0"></i>
+                    <span id="login-error-text">ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง</span>
+                </div>
+
+                <button type="submit" class="w-full py-2.5 px-4 bg-softsky-700 hover:bg-softsky-800 text-white rounded-xl text-sm font-display font-semibold shadow-sm transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-right-to-bracket"></i> เข้าสู่ระบบ
+                </button>
+
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                    <span>รหัสผ่านกำหนดเป็นตัวเลข 6 หลัก</span>
+                    <button type="button" onclick="openChangePasswordModal()" class="text-softsky-700 hover:underline font-medium">เปลี่ยนรหัสผ่าน</button>
+                </div>
+
+                <div class="pt-1">
+                    <button type="button" onclick="openRegisterRequestModal()" class="w-full py-2 px-3 bg-softmint-50 hover:bg-softmint-100 text-softmint-700 border border-softmint-200 rounded-xl text-xs font-display font-semibold transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-user-plus"></i> ยังไม่มีบัญชี? ลงทะเบียนขอใช้งานระบบ
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== REGISTER REQUEST MODAL ==================== -->
+    <div id="register-request-modal" class="fixed inset-0 bg-slate-900/45 backdrop-blur-[2px] z-[60] hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-fade">
+            <div class="bg-softmint-50 border-b border-softmint-200 px-5 py-3.5 flex items-center justify-between">
+                <div class="flex items-center gap-2 text-softmint-700">
+                    <i class="fa-solid fa-id-card"></i>
+                    <h3 class="font-display font-semibold text-sm">ลงทะเบียนขอสิทธิ์เข้าใช้งานระบบ</h3>
+                </div>
+                <button onclick="closeRegisterRequestModal()" class="text-slate-400 hover:text-slate-700">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form onsubmit="handleRegisterRequestSubmit(event)" class="p-5 space-y-3.5">
+                <div class="p-3 rounded-xl bg-softamber-50 border border-softamber-200 text-softamber-600 text-xs leading-relaxed">
+                    <i class="fa-solid fa-circle-info mr-1"></i>
+                    เมื่อส่งคำขอแล้ว <strong>Admin</strong> จะตรวจสอบและอนุมัติบัญชีของท่านในหน้า <em>จัดการบัญชีผู้ใช้งาน</em> ก่อนจึงจะสามารถเข้าสู่ระบบได้
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อ-นามสกุล / ตำแหน่ง <span class="text-rose-500">*</span></label>
+                    <input type="text" id="reg-fullname" required placeholder="เช่น นางสาวสมหญิง ใจดี (นักวิชาการคอมพิวเตอร์)" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-softsky-600">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">กลุ่มงาน / หน่วยงานสังกัด <span class="text-rose-500">*</span></label>
+                    <input type="text" id="reg-department" required placeholder="เช่น กลุ่มพัฒนาระบบดิจิทัล สำนักดิจิทัลการแพทย์" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-softsky-600">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อผู้ใช้งาน <span class="text-rose-500">*</span></label>
+                        <input type="text" id="reg-username" required placeholder="เช่น somying" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono focus:outline-none focus:border-softsky-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">รหัสผ่าน (ตัวเลข 6 หลัก) <span class="text-rose-500">*</span></label>
+                        <input type="password" id="reg-password" required inputmode="numeric" maxlength="6" pattern="\d{6}" oninput="this.value = this.value.replace(/\D/g, '').slice(0,6)" placeholder="000000" class="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono tracking-widest focus:outline-none focus:border-softsky-600">
+                    </div>
+                </div>
+                <div class="pt-2 flex justify-end gap-2 border-t border-slate-100">
+                    <button type="button" onclick="closeRegisterRequestModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-2 bg-softmint-600 hover:bg-softmint-700 text-white rounded-lg text-xs font-display font-semibold flex items-center gap-1.5">
+                        <i class="fa-solid fa-paper-plane"></i> ส่งคำขอลงทะเบียน
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== MAIN APP WINDOW ==================== -->
+    <div id="main-app-window" class="hidden w-full max-w-[1440px] h-screen sm:h-[93vh] bg-[#f8fafc] sm:rounded-2xl window-shadow flex-col overflow-hidden border border-slate-200">
+        
+        <!-- Top Header -->
+        <header class="bg-gradient-to-r from-[#e6f0f7] via-[#edf4f8] to-[#e2f1ec] text-slate-800 h-12 px-4 flex items-center justify-between shrink-0 border-b border-slate-200/90">
+            <div class="flex items-center gap-2.5 min-w-0">
+                <img id="header-logo-img" src="" alt="โลโก้" class="w-7 h-7 object-contain rounded-md bg-white p-0.5 border border-slate-200 shrink-0">
+                <div class="flex items-center gap-2 truncate text-xs sm:text-sm">
+                    <span class="font-display font-bold text-softsky-800 truncate">DMS Project Tracking Online</span>
+                    <span class="hidden lg:inline text-slate-300">|</span>
+                    <span class="hidden lg:inline text-slate-600 text-xs truncate">สำนักดิจิทัลการแพทย์ กรมการแพทย์</span>
+                </div>
+                <span id="role-header-badge" class="hidden sm:inline-block px-2.5 py-0.5 text-[11px] font-semibold bg-white/80 text-softsky-800 border border-softsky-200 rounded-full shrink-0">
+                    Role
+                </span>
+                <span id="cloud-sync-badge" class="hidden md:inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-medium bg-white/80 text-softmint-700 border border-softmint-200 rounded-full shrink-0">
+                    <i class="fa-solid fa-circle text-[6px] text-emerald-500"></i> ซิงค์ข้อมูลพร้อมใช้งาน
+                </span>
+            </div>
+            <div class="flex items-center gap-1.5 shrink-0">
+                <button onclick="logoutSystem()" class="px-2.5 py-1 bg-white/80 hover:bg-softrose-100 text-slate-700 hover:text-softrose-600 border border-slate-200 rounded-lg text-xs font-medium transition flex items-center gap-1.5" title="ออกจากระบบ">
+                    <i class="fa-solid fa-power-off"></i>
+                    <span class="hidden sm:inline">ออกจากระบบ</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Workspace -->
+        <div class="flex flex-1 overflow-hidden">
+            
+            <!-- Soft Sidebar -->
+            <aside class="w-16 md:w-64 bg-[#f3f7f9] border-r border-slate-200/90 flex flex-col justify-between shrink-0">
+                <div>
+                    <!-- Agency Logo & Name -->
+                    <div class="p-3 md:p-4 border-b border-slate-200/70 bg-[#eef4f7]">
+                        <div class="flex items-center gap-3">
+                            <img id="sidebar-logo-img" src="" alt="โลโก้สำนักดิจิทัลการแพทย์" class="w-11 h-11 object-contain rounded-xl bg-white p-1 border border-slate-200 shadow-2xs shrink-0">
+                            <div class="hidden md:block overflow-hidden">
+                                <div class="font-display font-bold text-softsky-800 text-xs leading-snug">สำนักดิจิทัลการแพทย์</div>
+                                <div class="text-[11px] text-softmint-700 font-medium truncate">กรมการแพทย์</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Menu -->
+                    <nav class="p-2 space-y-1 mt-1" id="sidebar-nav">
+                        <button onclick="switchTab('dashboard')" data-tab="dashboard" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all bg-softsky-100/90 text-softsky-800 border border-softsky-200">
+                            <i class="fa-solid fa-chart-pie w-5 text-center text-softsky-700"></i>
+                            <span class="hidden md:inline font-display">แดชบอร์ด (Home)</span>
+                        </button>
+                        <button onclick="switchTab('registry')" data-tab="registry" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/80 transition-all">
+                            <i class="fa-solid fa-folder-open w-5 text-center text-slate-500"></i>
+                            <span class="hidden md:inline font-display">ทะเบียนโครงการ</span>
+                            <span id="nav-count-badge" class="hidden md:inline-flex ml-auto px-2 py-0.5 text-xs rounded-full bg-white text-slate-600 border border-slate-200 font-semibold">0</span>
+                        </button>
+                        <button onclick="openNewProjectModal()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-softmint-700 hover:bg-softmint-50 transition-all">
+                            <i class="fa-solid fa-circle-plus w-5 text-center text-softmint-600"></i>
+                            <span class="hidden md:inline font-display">รับเรื่องโครงการใหม่</span>
+                        </button>
+                        <button onclick="switchTab('audit')" data-tab="audit" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/80 transition-all">
+                            <i class="fa-solid fa-clock-rotate-left w-5 text-center text-slate-500"></i>
+                            <span class="hidden md:inline font-display">ประวัติการดำเนินงาน</span>
+                        </button>
+                        <button onclick="switchTab('backup')" data-tab="backup" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/80 transition-all">
+                            <i class="fa-solid fa-database w-5 text-center text-slate-500"></i>
+                            <span class="hidden md:inline font-display">ส่งออก CSV & สำรองข้อมูล</span>
+                        </button>
+                        <button id="nav-btn-users" onclick="switchTab('users')" data-tab="users" class="nav-btn w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-white/80 transition-all">
+                            <i class="fa-solid fa-users-gear w-5 text-center text-slate-500"></i>
+                            <span class="hidden md:inline font-display">จัดการบัญชีผู้ใช้งาน</span>
+                            <span id="nav-pending-users-badge" class="hidden ml-auto px-2 py-0.5 text-[11px] rounded-full bg-amber-500 text-white font-bold">0</span>
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Operator Footer -->
+                <div class="p-3 border-t border-slate-200/80 bg-[#eef3f6]">
+                    <div class="hidden md:block mb-2.5">
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="text-[11px] font-semibold text-slate-500">ผู้ปฏิบัติงาน</label>
+                            <span id="sidebar-role-tag" class="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-softsky-100 text-softsky-800 border border-softsky-200">Admin</span>
+                        </div>
+                        <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-2.5 py-1.5">
+                            <i class="fa-solid fa-user-check text-softmint-600 text-xs"></i>
+                            <input type="text" id="operator-name" value="ผู้ดูแลระบบ" onchange="saveOperatorName(this.value)" class="w-full text-xs text-slate-700 font-medium focus:outline-none bg-transparent">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-1.5">
+                        <button onclick="openChangePasswordModal()" class="py-1.5 px-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[11px] font-display font-medium flex items-center justify-center gap-1 transition">
+                            <i class="fa-solid fa-key text-[10px] text-softsky-700"></i>
+                            <span class="hidden md:inline">รหัส 6 หลัก</span>
+                        </button>
+                        <button onclick="exportToCSV()" class="py-1.5 px-2 bg-softmint-100 hover:bg-softmint-200 text-softmint-700 border border-softmint-200 rounded-lg text-[11px] font-display font-medium flex items-center justify-center gap-1 transition">
+                            <i class="fa-solid fa-file-excel text-[10px]"></i>
+                            <span class="hidden md:inline">ส่งออก CSV</span>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6" id="main-scroll">
+
+                <!-- ==================== TAB 1: DASHBOARD (HOME) ==================== -->
+                <section id="tab-dashboard" class="tab-content animate-fade space-y-5">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
+                        <div class="flex items-center gap-4">
+                            <img id="dash-logo-img" src="" alt="โลโก้สำนักดิจิทัลการแพทย์" class="w-14 h-14 object-contain rounded-xl bg-softsky-50/60 p-1.5 border border-slate-200/80 shrink-0">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="px-2.5 py-0.5 rounded-full bg-softsky-100 text-softsky-800 text-xs font-semibold">สำนักดิจิทัลการแพทย์ กรมการแพทย์</span>
+                                    <span class="text-xs text-softmint-700 font-medium"><i class="fa-solid fa-check-circle mr-1"></i>ติดตามสถานะโครงการ 6 ขั้นตอน</span>
+                                </div>
+                                <h1 class="text-xl md:text-2xl font-bold text-slate-800 mt-1">แดชบอร์ดติดตามโครงการ</h1>
+                                <p class="text-xs sm:text-sm text-slate-500">ภาพรวมการรับเรื่อง ประชุมพิจารณา เสนอลงนาม และส่งคืนหน่วยงาน</p>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <label id="admin-upload-logo-btn" class="hidden cursor-pointer px-3 py-2 bg-softsky-50 hover:bg-softsky-100 text-softsky-800 border border-softsky-200 rounded-xl text-xs font-display font-semibold items-center gap-1.5 transition">
+                                <i class="fa-solid fa-image"></i> เปลี่ยนโลโก้ (Admin)
+                                <input type="file" accept="image/*" class="hidden" onchange="handleLogoUpload(event)">
+                            </label>
+                            <select id="dash-fiscal-filter" onchange="renderDashboard()" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm text-slate-700 font-medium focus:outline-none focus:border-softsky-600">
+                                <option value="ALL">ทุกปีงบประมาณ</option>
+                                <option value="2569">ปีงบประมาณ 2569</option>
+                                <option value="2568">ปีงบประมาณ 2568</option>
+                            </select>
+                            <button onclick="openNewProjectModal()" class="px-4 py-2 bg-softmint-600 hover:bg-softmint-700 text-white rounded-xl text-xs sm:text-sm font-display font-medium flex items-center gap-1.5 shadow-2xs transition">
+                                <i class="fa-solid fa-plus"></i> รับเรื่องโครงการใหม่
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 4 Soft-Toned KPI Blocks -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-softsky-50/90 p-5 rounded-2xl border border-softsky-200/90 flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-softsky-700">โครงการทั้งหมด</p>
+                                <h3 id="kpi-total" class="text-3xl font-bold text-softsky-800 mt-1">0</h3>
+                                <p class="text-xs text-slate-500 mt-1">ทะเบียนรับเรื่องในระบบ</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-white text-softsky-700 border border-softsky-200 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-layer-group"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-softamber-50/95 p-5 rounded-2xl border border-softamber-200/90 flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-softamber-600">กำลังดำเนินการ (ขั้นที่ 1-4)</p>
+                                <h3 id="kpi-inprogress" class="text-3xl font-bold text-[#855d28] mt-1">0</h3>
+                                <p class="text-xs text-slate-500 mt-1">รับเรื่อง / ประชุม / เสนอเซ็น</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-white text-softamber-600 border border-softamber-200 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-hourglass-half"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-softmint-50/95 p-5 rounded-2xl border border-softmint-200/90 flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-softmint-700">อนุมัติ / ส่งคืนแล้ว (ขั้นที่ 5-6)</p>
+                                <h3 id="kpi-completed" class="text-3xl font-bold text-softmint-700 mt-1">0</h3>
+                                <p class="text-xs text-slate-500 mt-1">ลงนามและส่งคืนเรียบร้อย</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-white text-softmint-600 border border-softmint-200 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+                        </div>
+
+                        <div class="bg-softrose-50/95 p-5 rounded-2xl border border-softrose-200/90 flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-semibold text-softrose-600">ไม่ผ่าน / ยกเลิก</p>
+                                <h3 id="kpi-rejected" class="text-3xl font-bold text-[#874350] mt-1">0</h3>
+                                <p class="text-xs text-slate-500 mt-1">ยุติการดำเนินการ</p>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-white text-softrose-600 border border-softrose-200 flex items-center justify-center text-xl">
+                                <i class="fa-solid fa-circle-xmark"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6-Step Chart & Right Panels -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                        <div class="lg:col-span-7 bg-white p-5 rounded-2xl border border-slate-200/80">
+                            <div class="flex items-center justify-between mb-4">
+                                <div>
+                                    <h3 class="font-bold text-slate-800 text-base">สัดส่วนโครงการแยกตาม 6 ขั้นตอน</h3>
+                                    <p class="text-xs text-slate-500">คลิกที่แถบเพื่อเปิดดูรายชื่อโครงการในขั้นตอนนี้</p>
+                                </div>
+                                <span class="text-xs px-2.5 py-1 rounded-full bg-softsky-50 text-softsky-800 border border-softsky-200 font-medium">6 ขั้นตอน</span>
+                            </div>
+                            <div id="step-chart-container" class="space-y-3"></div>
+                        </div>
+
+                        <div class="lg:col-span-5 flex flex-col gap-5">
+                            <div class="bg-white p-5 rounded-2xl border border-slate-200/80 flex-1">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="font-bold text-slate-800 text-sm">
+                                        <i class="fa-solid fa-bell text-amber-500 mr-1.5"></i>โครงการที่กำลังดำเนินการ
+                                    </h3>
+                                    <button onclick="switchTab('registry')" class="text-xs text-softsky-700 hover:underline font-medium">ดูทั้งหมด</button>
+                                </div>
+                                <div id="urgent-projects-list" class="space-y-2"></div>
+                            </div>
+
+                            <div class="bg-white p-5 rounded-2xl border border-slate-200/80">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h3 class="font-bold text-slate-800 text-sm">
+                                        <i class="fa-solid fa-clock-rotate-left text-softsky-700 mr-1.5"></i>ความเคลื่อนไหวล่าสุด
+                                    </h3>
+                                    <button onclick="switchTab('audit')" class="text-xs text-softsky-700 hover:underline font-medium">ดูทั้งหมด</button>
+                                </div>
+                                <div id="dashboard-recent-logs" class="space-y-2.5"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== TAB 2: REGISTRY ==================== -->
+                <section id="tab-registry" class="tab-content hidden animate-fade space-y-4">
+                    <div class="bg-white p-4 rounded-2xl border border-slate-200/80 space-y-3">
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                            <div>
+                                <h2 class="text-lg font-bold text-slate-800">ทะเบียนโครงการสำนักดิจิทัลการแพทย์</h2>
+                                <p class="text-xs text-slate-500">ตรวจสอบเลขทะเบียนรับไม่ซ้ำ และอัปเดตสถานะความคืบหน้า 6 ขั้นตอน</p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button onclick="exportToCSV()" class="px-3 py-2 bg-softmint-50 hover:bg-softmint-100 text-softmint-700 border border-softmint-200 rounded-xl text-xs font-display font-semibold flex items-center gap-1.5">
+                                    <i class="fa-solid fa-file-csv"></i> ส่งออก CSV
+                                </button>
+                                <button onclick="openNewProjectModal()" class="px-4 py-2 bg-softsky-700 hover:bg-softsky-800 text-white rounded-xl text-xs font-display font-semibold flex items-center gap-1.5">
+                                    <i class="fa-solid fa-plus"></i> เพิ่มโครงการใหม่
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-2.5 pt-3 border-t border-slate-100">
+                            <div class="lg:col-span-5 relative">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                                <input type="text" id="search-input" oninput="renderProjectTable()" placeholder="ค้นหาเลขทะเบียนรับ, ชื่อโครงการ, หน่วยงาน..." class="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:bg-white focus:border-softsky-600">
+                            </div>
+                            <div class="lg:col-span-3">
+                                <select id="filter-fiscal" onchange="renderProjectTable()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-softsky-600">
+                                    <option value="ALL">ทุกปีงบประมาณ</option>
+                                    <option value="2569">ปีงบประมาณ 2569</option>
+                                    <option value="2568">ปีงบประมาณ 2568</option>
+                                </select>
+                            </div>
+                            <div class="lg:col-span-4">
+                                <select id="filter-step" onchange="renderProjectTable()" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-softsky-600">
+                                    <option value="ALL">ทุกสถานะ (6 ขั้นตอน)</option>
+                                    <option value="1">1. รับเรื่องโครงการ</option>
+                                    <option value="2">2. เสนอเข้าที่ประชุมพิจารณา</option>
+                                    <option value="3">3. ผลการพิจารณา</option>
+                                    <option value="4">4. เสนอผู้มีอำนาจลงนาม</option>
+                                    <option value="5">5. ลงนามอนุมัติแล้ว</option>
+                                    <option value="6">6. ส่งคืนหน่วยงานเรียบร้อย</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200/80 overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50/90 border-b border-slate-200 text-xs font-display font-semibold text-slate-600">
+                                        <th class="py-3 px-4">เลขทะเบียนรับ</th>
+                                        <th class="py-3 px-4">ชื่อโครงการ / หน่วยงาน</th>
+                                        <th class="py-3 px-4">ปีงบ / งบประมาณ</th>
+                                        <th class="py-3 px-4">สถานะปัจจุบัน (6 ขั้นตอน)</th>
+                                        <th class="py-3 px-4 text-center">จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="project-table-body" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== TAB 3: AUDIT LOG ==================== -->
+                <section id="tab-audit" class="tab-content hidden animate-fade space-y-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 flex items-center justify-between">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800">ประวัติการดำเนินงาน (Audit Log)</h2>
+                            <p class="text-xs text-slate-500">บันทึกการลงทะเบียน การอนุมัติผู้ใช้ และการอัปเดตสถานะโครงการ</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-2xl border border-slate-200/80 p-4">
+                        <div id="audit-log-list" class="divide-y divide-slate-100"></div>
+                    </div>
+                </section>
+
+                <!-- ==================== TAB 4: BACKUP & EXPORT ==================== -->
+                <section id="tab-backup" class="tab-content hidden animate-fade space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200/80 space-y-3">
+                            <h3 class="font-bold text-slate-800 text-base"><i class="fa-solid fa-file-excel text-softmint-600 mr-2"></i>ส่งออกข้อมูลโครงการเป็นไฟล์ CSV</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed">ดาวน์โหลดข้อมูลโครงการทั้งหมดพร้อมสถานะ 6 ขั้นตอนในรูปแบบไฟล์ CSV (รองรับภาษาไทยใน Microsoft Excel)</p>
+                            <button onclick="exportToCSV()" class="px-4 py-2 bg-softmint-600 hover:bg-softmint-700 text-white rounded-xl text-xs font-display font-semibold flex items-center gap-2">
+                                <i class="fa-solid fa-download"></i> ดาวน์โหลดไฟล์ CSV
+                            </button>
+                        </div>
+
+                        <div id="admin-cloud-panel" class="bg-white p-5 rounded-2xl border border-slate-200/80 space-y-3">
+                            <h3 class="font-bold text-slate-800 text-base"><i class="fa-solid fa-cloud text-softsky-700 mr-2"></i>เชื่อมต่อ Firebase Firestore (สำหรับ Admin)</h3>
+                            <p class="text-xs text-slate-500">วาง JSON ของ Firebase Config และระบุชื่อ Room ID เพื่อให้ทุกเครื่องแชร์ฐานข้อมูลเดียวกัน</p>
+                            <input type="text" id="cloud-room-id" placeholder="Room ID เช่น dms-project-2569" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono">
+                            <textarea id="cloud-config-json" rows="4" placeholder='{"apiKey":"...","projectId":"...","appId":"..."}' class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs font-mono"></textarea>
+                            <div class="flex gap-2">
+                                <button onclick="saveCloudConfig()" class="px-4 py-2 bg-softsky-700 hover:bg-softsky-800 text-white rounded-xl text-xs font-display font-semibold">บันทึกและเชื่อมต่อ</button>
+                                <button onclick="clearCloudConfig()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold">ใช้โหมดภายในเครื่อง/เบราว์เซอร์</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ==================== TAB 5: USER MANAGEMENT (ADMIN) ==================== -->
+                <section id="tab-users" class="tab-content hidden animate-fade space-y-5">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-800">จัดการบัญชีผู้ใช้งาน & อนุมัติคำขอลงทะเบียน</h2>
+                            <p class="text-xs text-slate-500">อนุมัติผู้สมัครใหม่ เพิ่ม/แก้ไข/ลบบัญชีผู้ใช้ และกำหนดรหัสผ่านตัวเลข 6 หลัก</p>
+                        </div>
+                        <button onclick="openAddUserModal()" class="px-4 py-2 bg-softsky-700 hover:bg-softsky-800 text-white rounded-xl text-xs font-display font-semibold flex items-center gap-1.5">
+                            <i class="fa-solid fa-user-plus"></i> เพิ่มบัญชีผู้ใช้ใหม่
+                        </button>
+                    </div>
+
+                    <!-- Pending Approval Table -->
+                    <div class="bg-softamber-50/70 rounded-2xl border border-softamber-200 overflow-hidden">
+                        <div class="px-5 py-3.5 border-b border-softamber-200 flex items-center justify-between">
+                            <h3 class="font-display font-bold text-sm text-softamber-600">
+                                <i class="fa-solid fa-user-clock mr-1.5"></i> รายการลงทะเบียนรออนุมัติจาก Admin
+                            </h3>
+                            <span id="pending-count-label" class="px-2.5 py-0.5 rounded-full bg-amber-500 text-white text-xs font-bold">0 รายการ</span>
+                        </div>
+                        <div class="overflow-x-auto bg-white">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-amber-50/50 border-b border-slate-200 text-xs font-display font-semibold text-slate-600">
+                                        <th class="py-2.5 px-4">ชื่อ-นามสกุล / ตำแหน่ง</th>
+                                        <th class="py-2.5 px-4">กลุ่มงาน / หน่วยงาน</th>
+                                        <th class="py-2.5 px-4">Username</th>
+                                        <th class="py-2.5 px-4">วันที่ขอใช้งาน</th>
+                                        <th class="py-2.5 px-4 text-center">การอนุมัติ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pending-users-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Approved Users Table -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 overflow-hidden">
+                        <div class="px-5 py-3.5 border-b border-slate-200">
+                            <h3 class="font-display font-bold text-sm text-slate-800">รายชื่อผู้ใช้งานที่ได้รับอนุมัติแล้ว</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-xs font-display font-semibold text-slate-600">
+                                        <th class="py-2.5 px-4">ชื่อ-นามสกุล / ตำแหน่ง</th>
+                                        <th class="py-2.5 px-4">หน่วยงาน</th>
+                                        <th class="py-2.5 px-4">Username</th>
+                                        <th class="py-2.5 px-4">รหัส (6 หลัก)</th>
+                                        <th class="py-2.5 px-4">สิทธิ์</th>
+                                        <th class="py-2.5 px-4 text-center">จัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="approved-users-tbody" class="divide-y divide-slate-100 text-sm"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- ==================== NEW PROJECT MODAL ==================== -->
+    <div id="new-project-modal" class="fixed inset-0 bg-slate-900/45 backdrop-blur-[2px] z-[60] hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-xl rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-fade">
+            <div class="bg-softsky-50 border-b border-softsky-200 px-5 py-3.5 flex items-center justify-between">
+                <h3 class="font-display font-bold text-sm text-softsky-800"><i class="fa-solid fa-folder-plus mr-1.5"></i> ลงทะเบียนรับเรื่องโครงการใหม่</h3>
+                <button onclick="closeNewProjectModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleCreateProject(event)" class="p-5 space-y-3.5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">เลขทะเบียนรับ (ห้ามซ้ำ) <span class="text-rose-500">*</span></label>
+                        <input type="text" id="new-reg-no" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-mono font-semibold text-softsky-800">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">ปีงบประมาณ</label>
+                        <select id="new-fiscal" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+                            <option value="2569">2569</option>
+                            <option value="2568">2568</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อโครงการ <span class="text-rose-500">*</span></label>
+                    <input type="text" id="new-title" required placeholder="ระบุชื่อโครงการ" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">หน่วยงานผู้เสนอ <span class="text-rose-500">*</span></label>
+                        <input type="text" id="new-dept" required placeholder="เช่น สำนักดิจิทัลการแพทย์" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">งบประมาณ (บาท)</label>
+                        <input type="number" id="new-budget" min="0" step="0.01" value="0" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">วันที่รับเรื่อง</label>
+                    <input type="date" id="new-received-date" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+                </div>
+                <div class="pt-2 flex justify-end gap-2 border-t border-slate-100">
+                    <button type="button" onclick="closeNewProjectModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-2 bg-softsky-700 hover:bg-softsky-800 text-white rounded-xl text-xs font-display font-semibold">บันทึกทะเบียนรับ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== PROJECT DETAIL / 6-STEP MODAL ==================== -->
+    <div id="project-detail-modal" class="fixed inset-0 bg-slate-900/45 backdrop-blur-[2px] z-[60] hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-fade max-h-[90vh] flex flex-col">
+            <div class="bg-softsky-50 border-b border-softsky-200 px-5 py-3.5 flex items-center justify-between shrink-0">
+                <div>
+                    <span id="detail-reg-no" class="text-xs font-mono font-bold text-softsky-800 bg-white px-2 py-0.5 rounded border border-softsky-200"></span>
+                    <h3 id="detail-title" class="font-display font-bold text-sm sm:text-base text-slate-800 mt-1"></h3>
+                </div>
+                <button onclick="closeProjectDetailModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-5 overflow-y-auto space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs bg-slate-50 p-3.5 rounded-xl border border-slate-200/80">
+                    <div><span class="text-slate-500">หน่วยงาน:</span> <strong id="detail-dept" class="text-slate-800"></strong></div>
+                    <div><span class="text-slate-500">งบประมาณ:</span> <strong id="detail-budget" class="text-slate-800"></strong></div>
+                </div>
+
+                <!-- Admin Deep Edit Section -->
+                <div id="admin-deep-edit-box" class="hidden p-3.5 rounded-xl bg-softamber-50/70 border border-softamber-200 space-y-2.5">
+                    <div class="text-xs font-display font-bold text-softamber-600"><i class="fa-solid fa-sliders mr-1"></i> แก้ไขข้อมูลหลัก (เฉพาะ Admin)</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">เลขทะเบียนรับ</label>
+                            <input type="text" id="edit-reg-no" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">งบประมาณ (บาท)</label>
+                            <input type="number" id="edit-budget" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-slate-600 mb-0.5">ชื่อโครงการ</label>
+                        <input type="text" id="edit-title" class="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs">
+                    </div>
+                </div>
+
+                <!-- 6-Step Status Update -->
+                <div class="space-y-2.5">
+                    <label class="block text-xs font-display font-bold text-slate-700">อัปเดตสถานะความคืบหน้า (6 ขั้นตอน)</label>
+                    <select id="detail-current-step" onchange="toggleRejectReasonBox()" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-medium">
+                        <option value="1">1. รับเรื่องโครงการ</option>
+                        <option value="2">2. เสนอเข้าที่ประชุมพิจารณา</option>
+                        <option value="3">3. ผลการพิจารณา</option>
+                        <option value="4">4. เสนอผู้มีอำนาจลงนาม</option>
+                        <option value="5">5. ลงนามอนุมัติแล้ว</option>
+                        <option value="6">6. ส่งคืนหน่วยงานเรียบร้อย</option>
+                    </select>
+
+                    <div id="reject-reason-box" class="hidden">
+                        <label class="block text-xs font-semibold text-softrose-600 mb-1">หมายเหตุ / เหตุผลไม่ผ่านหรือยกเลิก</label>
+                        <input type="text" id="detail-reject-reason" placeholder="ระบุเหตุผล" class="w-full px-3 py-2 border border-softrose-200 rounded-xl text-xs">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-0.5">วันที่ประชุมพิจารณา</label>
+                            <input type="date" id="detail-date-meeting" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-0.5">วันที่เสนอลงนาม</label>
+                            <input type="date" id="detail-date-sign" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-500 mb-0.5">วันที่ส่งคืนหน่วยงาน</label>
+                            <input type="date" id="detail-date-return" class="w-full px-2.5 py-1.5 border border-slate-200 rounded-lg text-xs">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] text-slate-500 mb-0.5">บันทึกเพิ่มเติม</label>
+                        <textarea id="detail-note" rows="2" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between shrink-0">
+                <button id="delete-project-btn" onclick="deleteCurrentProject()" class="hidden px-3 py-2 bg-softrose-50 hover:bg-softrose-100 text-softrose-600 border border-softrose-200 rounded-xl text-xs font-semibold">
+                    <i class="fa-solid fa-trash mr-1"></i> ลบโครงการ
+                </button>
+                <div class="flex gap-2 ml-auto">
+                    <button onclick="closeProjectDetailModal()" class="px-4 py-2 bg-white border border-slate-200 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-semibold">ปิด</button>
+                    <button onclick="saveProjectDetailChanges()" class="px-4 py-2 bg-softmint-600 hover:bg-softmint-700 text-white rounded-xl text-xs font-display font-semibold">บันทึกการเปลี่ยนแปลง</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== ADD/EDIT USER MODAL (ADMIN) ==================== -->
+    <div id="user-modal" class="fixed inset-0 bg-slate-900/45 backdrop-blur-[2px] z-[60] hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-fade">
+            <div class="bg-softsky-50 border-b border-softsky-200 px-5 py-3.5 flex items-center justify-between">
+                <h3 id="user-modal-title" class="font-display font-bold text-sm text-softsky-800">จัดการบัญชีผู้ใช้</h3>
+                <button onclick="closeUserModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleSaveUserModal(event)" class="p-5 space-y-3">
+                <input type="hidden" id="edit-user-id">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">ชื่อ-นามสกุล / ตำแหน่ง <span class="text-rose-500">*</span></label>
+                    <input type="text" id="user-fullname" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">กลุ่มงาน / หน่วยงาน</label>
+                    <input type="text" id="user-department" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">Username <span class="text-rose-500">*</span></label>
+                        <input type="text" id="user-username" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-700 mb-1">รหัสผ่าน (ตัวเลข 6 หลัก) <span class="text-rose-500">*</span></label>
+                        <input type="text" id="user-password" required inputmode="numeric" maxlength="6" pattern="\d{6}" oninput="this.value = this.value.replace(/\D/g, '').slice(0,6)" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-mono tracking-widest">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">สิทธิ์การใช้งาน</label>
+                    <select id="user-role" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm">
+                        <option value="staff">Staff (เจ้าหน้าที่ปฏิบัติงาน)</option>
+                        <option value="admin">Admin (ผู้ดูแลระบบ)</option>
+                    </select>
+                </div>
+                <div class="pt-2 flex justify-end gap-2 border-t border-slate-100">
+                    <button type="button" onclick="closeUserModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-2 bg-softsky-700 hover:bg-softsky-800 text-white rounded-xl text-xs font-display font-semibold">บันทึกบัญชี</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== CHANGE PASSWORD MODAL (6 DIGITS) ==================== -->
+    <div id="change-password-modal" class="fixed inset-0 bg-slate-900/45 backdrop-blur-[2px] z-[60] hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-xl border border-slate-200 overflow-hidden animate-fade">
+            <div class="bg-softsky-50 border-b border-softsky-200 px-5 py-3.5 flex items-center justify-between">
+                <h3 class="font-display font-bold text-sm text-softsky-800">เปลี่ยนรหัสผ่าน (ตัวเลข 6 หลัก)</h3>
+                <button onclick="closeChangePasswordModal()" class="text-slate-400 hover:text-slate-700"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleChangePassword(event)" class="p-5 space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Username</label>
+                    <input type="text" id="cp-username" required class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">รหัสผ่านเดิม (6 หลัก)</label>
+                    <input type="password" id="cp-old-pass" required inputmode="numeric" maxlength="6" pattern="\d{6}" oninput="this.value = this.value.replace(/\D/g, '').slice(0,6)" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-mono tracking-widest">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">รหัสผ่านใหม่ (ตัวเลข 6 หลัก)</label>
+                    <input type="password" id="cp-new-pass" required inputmode="numeric" maxlength="6" pattern="\d{6}" oninput="this.value = this.value.replace(/\D/g, '').slice(0,6)" class="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm font-mono tracking-widest">
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeChangePasswordModal()" class="px-3 py-2 bg-slate-100 rounded-xl text-xs font-semibold">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-2 bg-softsky-700 text-white rounded-xl text-xs font-display font-semibold">บันทึกรหัสผ่านใหม่</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Default SVG Logo (สำนักดิจิทัลการแพทย์ กรมการแพทย์)
+        const DEFAULT_LOGO_SVG = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+                <circle cx="60" cy="60" r="54" fill="#e6f0f7" stroke="#3d7a69" stroke-width="5"/>
+                <circle cx="60" cy="60" r="42" fill="#ffffff" stroke="#4a7c9b" stroke-width="2" stroke-dasharray="4 3"/>
+                <path d="M60 28 L66 44 L82 44 L69 54 L74 70 L60 60 L46 70 L51 54 L38 44 L54 44 Z" fill="#3d7a69" opacity="0.88"/>
+                <text x="60" y="90" text-anchor="middle" font-family="Prompt, sans-serif" font-size="13" font-weight="700" fill="#2b4b61">DMS</text>
+                <text x="60" y="103" text-anchor="middle" font-family="Sarabun, sans-serif" font-size="8.5" fill="#2f6153">กรมการแพทย์</text>
+            </svg>
+        `);
+
+        const STEP_LABELS = {
+            1: '1. รับเรื่องโครงการ',
+            2: '2. เสนอเข้าที่ประชุมพิจารณา',
+            3: '3. ผลการพิจารณา',
+            4: '4. เสนอผู้มีอำนาจลงนาม',
+            5: '5. ลงนามอนุมัติแล้ว',
+            6: '6. ส่งคืนหน่วยงานเรียบร้อย'
+        };
+
+        const STEP_BAR_COLORS = {
+            1: 'bg-sky-300',
+            2: 'bg-indigo-300',
+            3: 'bg-amber-300',
+            4: 'bg-orange-300',
+            5: 'bg-teal-400',
+            6: 'bg-emerald-400'
+        };
+
+        const STORAGE_KEYS = {
+            projects: 'dms_v3_projects',
+            users: 'dms_v3_users',
+            logs: 'dms_v3_logs',
+            logo: 'dms_v3_logo',
+            session: 'dms_v3_session',
+            cloudConfig: 'dms_v3_cloud_config',
+            roomId: 'dms_v3_room_id'
+        };
+
+        const syncChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('dms_project_sync_v3') : null;
+        let firestoreDb = null;
+        let cloudRoomId = localStorage.getItem(STORAGE_KEYS.roomId) || 'dms-project-default';
+        let currentUser = null;
+        let activeEditingProjectId = null;
+
+        let state = {
+            projects: [],
+            users: [],
+            logs: [],
+            logo: DEFAULT_LOGO_SVG
+        };
+
+        function isValidSixDigitPin(pin) {
+            return /^\d{6}$/.test(String(pin || '').trim());
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const palette = {
+                success: 'bg-softmint-50 border-softmint-200 text-softmint-700',
+                error: 'bg-softrose-50 border-softrose-200 text-softrose-600',
+                info: 'bg-softsky-50 border-softsky-200 text-softsky-800'
+            };
+            const el = document.createElement('div');
+            el.className = `px-4 py-2.5 rounded-xl border shadow-md text-xs font-medium flex items-center gap-2 animate-fade ${palette[type] || palette.info}`;
+            el.innerHTML = `<i class="fa-solid fa-circle-info"></i><span>${escapeHtml(message)}</span>`;
+            container.appendChild(el);
+            setTimeout(() => el.remove(), 3200);
+        }
+
+        function escapeHtml(str) {
+            return String(str || '').replace(/[&<>"']/g, s => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[s]));
+        }
+
+        function seedInitialDataIfEmpty() {
+            const savedUsers = localStorage.getItem(STORAGE_KEYS.users);
+            if (savedUsers) {
+                state.users = JSON.parse(savedUsers);
+            } else {
+                state.users = [
+                    {
+                        id: 'u-admin-1',
+                        username: 'admin',
+                        password: '123456',
+                        fullName: 'ผู้ดูแลระบบ (Admin)',
+                        department: 'สำนักดิจิทัลการแพทย์ กรมการแพทย์',
+                        role: 'admin',
+                        status: 'approved',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'u-staff-1',
+                        username: 'staff01',
+                        password: '111111',
+                        fullName: 'เจ้าหน้าที่ปฏิบัติงาน 01',
+                        department: 'สำนักดิจิทัลการแพทย์ กรมการแพทย์',
+                        role: 'staff',
+                        status: 'approved',
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+                localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(state.users));
+            }
+
+            const savedProjects = localStorage.getItem(STORAGE_KEYS.projects);
+            if (savedProjects) {
+                state.projects = JSON.parse(savedProjects);
+            } else {
+                state.projects = [
+                    {
+                        id: 'prj-101',
+                        regNo: 'DMS-2569-001',
+                        fiscalYear: '2569',
+                        title: 'โครงการพัฒนาระบบติดตามโครงการดิจิทัล',
+                        department: 'กลุ่มพัฒนาระบบดิจิทัล สำนักดิจิทัลการแพทย์',
+                        budget: 450000,
+                        receivedDate: '2026-11-02',
+                        currentStep: 2,
+                        rejected: false,
+                        rejectReason: '',
+                        dateMeeting: '2026-11-18',
+                        dateSign: '',
+                        dateReturn: '',
+                        note: 'รอเข้าที่ประชุมพิจารณา'
+                    }
+                ];
+                localStorage.setItem(STORAGE_KEYS.projects, JSON.stringify(state.projects));
+            }
+
+            const savedLogs = localStorage.getItem(STORAGE_KEYS.logs);
+            state.logs = savedLogs ? JSON.parse(savedLogs) : [];
+
+            const savedLogo = localStorage.getItem(STORAGE_KEYS.logo);
+            state.logo = savedLogo || DEFAULT_LOGO_SVG;
+            applyLogos();
+        }
+
+        function applyLogos() {
+            const src = state.logo || DEFAULT_LOGO_SVG;
+            ['login-logo-img', 'header-logo-img', 'sidebar-logo-img', 'dash-logo-img'].forEach(id => {
+                const img = document.getElementById(id);
+                if (img) img.src = src;
+            });
+        }
+
+        function handleLogoUpload(event) {
+            if (!currentUser || currentUser.role !== 'admin') return;
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                state.logo = e.target.result;
+                localStorage.setItem(STORAGE_KEYS.logo, state.logo);
+                applyLogos();
+                addAuditLog('เปลี่ยนโลโก้สำนักดิจิทัลการแพทย์บนหน้าแดชบอร์ด');
+                persistAll(true);
+                showToast('อัปเดตโลโก้เรียบร้อยแล้ว', 'success');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function addAuditLog(actionText) {
+            const actor = currentUser ? `${currentUser.fullName} (${currentUser.role})` : 'ระบบ';
+            state.logs.unshift({
+                id: 'log-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+                action: actionText,
+                actor,
+                timestamp: new Date().toLocaleString('th-TH')
+            });
+            state.logs = state.logs.slice(0, 100);
+            localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(state.logs));
+        }
+
+        function persistAll(broadcast = true) {
+            localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(state.users));
+            localStorage.setItem(STORAGE_KEYS.projects, JSON.stringify(state.projects));
+            localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(state.logs));
+            localStorage.setItem(STORAGE_KEYS.logo, state.logo);
+
+            if (firestoreDb && cloudRoomId) {
+                firestoreDb.collection('dms_rooms').doc(cloudRoomId).set({
+                    users: state.users,
+                    projects: state.projects,
+                    logs: state.logs,
+                    logo: state.logo,
+                    updatedAt: Date.now()
+                }, { merge: true }).catch(() => {});
+            }
+
+            if (broadcast && syncChannel) {
+                syncChannel.postMessage({ type: 'STATE_UPDATED', ts: Date.now() });
+            }
+        }
+
+        function reloadFromStorageAndRender() {
+            const u = localStorage.getItem(STORAGE_KEYS.users);
+            const p = localStorage.getItem(STORAGE_KEYS.projects);
+            const l = localStorage.getItem(STORAGE_KEYS.logs);
+            const logo = localStorage.getItem(STORAGE_KEYS.logo);
+            if (u) state.users = JSON.parse(u);
+            if (p) state.projects = JSON.parse(p);
+            if (l) state.logs = JSON.parse(l);
+            if (logo) state.logo = logo;
+            applyLogos();
+            updatePendingBadge();
+            if (currentUser) {
+                renderDashboard();
+                renderProjectTable();
+                renderAuditLogs();
+                if (currentUser.role === 'admin') {
+                    renderUsersTables();
+                }
+            }
+        }
+
+        if (syncChannel) {
+            syncChannel.onmessage = () => reloadFromStorageAndRender();
+        }
+        window.addEventListener('storage', (e) => {
+            if ([STORAGE_KEYS.users, STORAGE_KEYS.projects, STORAGE_KEYS.logs, STORAGE_KEYS.logo].includes(e.key)) {
+                reloadFromStorageAndRender();
+            }
+        });
+
+        function initFirebaseIfConfigured() {
+            const rawCfg = localStorage.getItem(STORAGE_KEYS.cloudConfig);
+            const room = localStorage.getItem(STORAGE_KEYS.roomId);
+            if (room) cloudRoomId = room;
+            document.getElementById('cloud-room-id').value = cloudRoomId;
+            if (!rawCfg) return;
+
+            try {
+                const cfg = JSON.parse(rawCfg);
+                document.getElementById('cloud-config-json').value = rawCfg;
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(cfg);
+                }
+                firestoreDb = firebase.firestore();
+                firestoreDb.collection('dms_rooms').doc(cloudRoomId).onSnapshot((doc) => {
+                    if (!doc.exists) return;
+                    const data = doc.data();
+                    if (Array.isArray(data.users)) {
+                        state.users = data.users;
+                        localStorage.setItem(STORAGE_KEYS.users, JSON.stringify(state.users));
+                    }
+                    if (Array.isArray(data.projects)) {
+                        state.projects = data.projects;
+                        localStorage.setItem(STORAGE_KEYS.projects, JSON.stringify(state.projects));
+                    }
+                    if (Array.isArray(data.logs)) {
+                        state.logs = data.logs;
+                        localStorage.setItem(STORAGE_KEYS.logs, JSON.stringify(state.logs));
+                    }
+                    if (data.logo) {
+                        state.logo = data.logo;
+                        localStorage.setItem(STORAGE_KEYS.logo, state.logo);
+                    }
+                    reloadFromStorageAndRender();
+                });
+                document.getElementById('cloud-sync-badge').innerHTML = `<i class="fa-solid fa-circle text-[6px] text-emerald-500"></i> Cloud: ${escapeHtml(cloudRoomId)}`;
+            } catch (err) {
+                showToast('ค่า Firebase Config ไม่ถูกต้อง', 'error');
+            }
+        }
+
+        function saveCloudConfig() {
+            const room = document.getElementById('cloud-room-id').value.trim();
+            const raw = document.getElementById('cloud-config-json').value.trim();
+            if (!room || !raw) {
+                showToast('กรุณากรอก Room ID และ Firebase Config', 'error');
+                return;
+            }
+            try {
+                JSON.parse(raw);
+                localStorage.setItem(STORAGE_KEYS.roomId, room);
+                localStorage.setItem(STORAGE_KEYS.cloudConfig, raw);
+                cloudRoomId = room;
+                initFirebaseIfConfigured();
+                persistAll(true);
+                showToast('บันทึกและเชื่อมต่อ Cloud เรียบร้อยแล้ว', 'success');
+            } catch {
+                showToast('รูปแบบ JSON ของ Firebase Config ไม่ถูกต้อง', 'error');
+            }
+        }
+
+        function clearCloudConfig() {
+            localStorage.removeItem(STORAGE_KEYS.cloudConfig);
+            firestoreDb = null;
+            document.getElementById('cloud-sync-badge').innerHTML = `<i class="fa-solid fa-circle text-[6px] text-emerald-500"></i> ซิงค์ข้อมูลพร้อมใช้งาน`;
+            showToast('สลับเป็นโหมดซิงค์ผ่านเบราว์เซอร์แล้ว', 'info');
+        }
+
+        // ==================== AUTH & REGISTRATION ====================
+        function togglePasswordVisibility(inputId) {
+            const input = document.getElementById(inputId);
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function handleLogin(e) {
+            e.preventDefault();
+            reloadFromStorageAndRender();
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value.trim();
+            const errBox = document.getElementById('login-error-msg');
+            const errText = document.getElementById('login-error-text');
+
+            if (!isValidSixDigitPin(password)) {
+                errText.textContent = 'รหัสผ่านต้องเป็นตัวเลข 6 หลัก';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            const matchedUser = state.users.find(u => u.username.toLowerCase() === username.toLowerCase() && u.password === password);
+            if (!matchedUser) {
+                errText.textContent = 'ชื่อผู้ใช้งานหรือรหัสผ่านไม่ถูกต้อง';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            if (matchedUser.status === 'pending') {
+                errText.textContent = 'บัญชีของท่านอยู่ระหว่างรอ Admin อนุมัติการใช้งาน';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            if (matchedUser.status === 'rejected') {
+                errText.textContent = 'คำขอใช้งานบัญชีนี้ถูกปฏิเสธ กรุณาติดต่อ Admin';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
+            errBox.classList.add('hidden');
+            currentUser = matchedUser;
+            localStorage.setItem(STORAGE_KEYS.session, JSON.stringify({ userId: matchedUser.id }));
+            enterMainApp();
+        }
+
+        function enterMainApp() {
+            document.getElementById('login-screen').classList.add('hidden');
+            const win = document.getElementById('main-app-window');
+            win.classList.remove('hidden');
+            win.classList.add('flex');
+
+            const isAdmin = currentUser.role === 'admin';
+            document.getElementById('role-header-badge').textContent = isAdmin ? 'ผู้ดูแลระบบ (Admin)' : 'เจ้าหน้าที่ (Staff)';
+            document.getElementById('sidebar-role-tag').textContent = isAdmin ? 'Admin' : 'Staff';
+            document.getElementById('operator-name').value = currentUser.fullName;
+            document.getElementById('operator-name').disabled = !isAdmin;
+
+            document.getElementById('nav-btn-users').classList.toggle('hidden', !isAdmin);
+            document.getElementById('admin-upload-logo-btn').classList.toggle('hidden', !isAdmin);
+            document.getElementById('admin-upload-logo-btn').classList.toggle('inline-flex', isAdmin);
+            document.getElementById('admin-cloud-panel').classList.toggle('hidden', !isAdmin);
+
+            updatePendingBadge();
+            switchTab('dashboard');
+            renderDashboard();
+            renderProjectTable();
+            renderAuditLogs();
+            if (isAdmin) renderUsersTables();
+        }
+
+        function logoutSystem() {
+            currentUser = null;
+            localStorage.removeItem(STORAGE_KEYS.session);
+            document.getElementById('main-app-window').classList.add('hidden');
+            document.getElementById('main-app-window').classList.remove('flex');
+            document.getElementById('login-screen').classList.remove('hidden');
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('login-error-msg').classList.add('hidden');
+        }
+
+        function saveOperatorName(val) {
+            if (!currentUser || currentUser.role !== 'admin') return;
+            currentUser.fullName = val.trim() || currentUser.fullName;
+            const idx = state.users.findIndex(u => u.id === currentUser.id);
+            if (idx !== -1) state.users[idx].fullName = currentUser.fullName;
+            persistAll(true);
+        }
+
+        // Self-Registration Request
+        function openRegisterRequestModal() {
+            document.getElementById('reg-fullname').value = '';
+            document.getElementById('reg-department').value = '';
+            document.getElementById('reg-username').value = '';
+            document.getElementById('reg-password').value = '';
+            const m = document.getElementById('register-request-modal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function closeRegisterRequestModal() {
+            const m = document.getElementById('register-request-modal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        function handleRegisterRequestSubmit(e) {
+            e.preventDefault();
+            reloadFromStorageAndRender();
+
+            const fullName = document.getElementById('reg-fullname').value.trim();
+            const department = document.getElementById('reg-department').value.trim();
+            const username = document.getElementById('reg-username').value.trim();
+            const password = document.getElementById('reg-password').value.trim();
+
+            if (!isValidSixDigitPin(password)) {
+                showToast('กรุณากำหนดรหัสผ่านเป็นตัวเลข 6 หลัก', 'error');
+                return;
+            }
+
+            if (state.users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
+                showToast('ชื่อผู้ใช้งาน (Username) นี้มีอยู่ในระบบแล้ว', 'error');
+                return;
+            }
+
+            const newPendingUser = {
+                id: 'u-' + Date.now(),
+                fullName,
+                department,
+                username,
+                password,
+                role: 'staff',
+                status: 'pending',
+                createdAt: new Date().toLocaleDateString('th-TH')
+            };
+
+            state.users.push(newPendingUser);
+            addAuditLog(`มีคำขอลงทะเบียนใหม่: ${fullName} (${username}) รอ Admin อนุมัติ`);
+            persistAll(true);
+            updatePendingBadge();
+            closeRegisterRequestModal();
+            showToast('ส่งคำขอลงทะเบียนเรียบร้อยแล้ว กรุณารอ Admin อนุมัติ', 'success');
+        }
+
+        function updatePendingBadge() {
+            const pendingCount = state.users.filter(u => u.status === 'pending').length;
+            const badge = document.getElementById('nav-pending-users-badge');
+            if (!badge) return;
+            if (pendingCount > 0) {
+                badge.textContent = pendingCount;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        // ==================== USER MANAGEMENT (ADMIN) ====================
+        function renderUsersTables() {
+            const pendingUsers = state.users.filter(u => u.status === 'pending');
+            const approvedUsers = state.users.filter(u => u.status !== 'pending');
+
+            document.getElementById('pending-count-label').textContent = `${pendingUsers.length} รายการ`;
+            const pendingBody = document.getElementById('pending-users-tbody');
+
+            if (pendingUsers.length === 0) {
+                pendingBody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-xs text-slate-400">ไม่มีรายการลงทะเบียนรออนุมัติ</td></tr>`;
+            } else {
+                pendingBody.innerHTML = pendingUsers.map(u => `
+                    <tr class="hover:bg-amber-50/40">
+                        <td class="py-3 px-4 font-medium text-slate-800">${escapeHtml(u.fullName)}</td>
+                        <td class="py-3 px-4 text-xs text-slate-600">${escapeHtml(u.department || '-')}</td>
+                        <td class="py-3 px-4 font-mono text-xs text-softsky-800">${escapeHtml(u.username)}</td>
+                        <td class="py-3 px-4 text-xs text-slate-500">${escapeHtml(u.createdAt || '-')}</td>
+                        <td class="py-3 px-4 text-center">
+                            <div class="inline-flex items-center gap-1.5">
+                                <button onclick="approveUser('${u.id}', 'staff')" class="px-2.5 py-1 bg-softmint-600 hover:bg-softmint-700 text-white rounded-lg text-xs font-semibold">อนุมัติ Staff</button>
+                                <button onclick="approveUser('${u.id}', 'admin')" class="px-2.5 py-1 bg-softsky-700 hover:bg-softsky-800 text-white rounded-lg text-xs font-semibold">อนุมัติ Admin</button>
+                                <button onclick="rejectPendingUser('${u.id}')" class="px-2.5 py-1 bg-softrose-50 hover:bg-softrose-100 text-softrose-600 border border-softrose-200 rounded-lg text-xs font-semibold">ปฏิเสธ</button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+
+            const approvedBody = document.getElementById('approved-users-tbody');
+            approvedBody.innerHTML = approvedUsers.map(u => `
+                <tr class="hover:bg-slate-50">
+                    <td class="py-3 px-4 font-medium text-slate-800">${escapeHtml(u.fullName)}</td>
+                    <td class="py-3 px-4 text-xs text-slate-600">${escapeHtml(u.department || '-')}</td>
+                    <td class="py-3 px-4 font-mono text-xs">${escapeHtml(u.username)}</td>
+                    <td class="py-3 px-4 font-mono text-xs tracking-widest">${escapeHtml(u.password)}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold ${u.role === 'admin' ? 'bg-softsky-100 text-softsky-800' : 'bg-softmint-100 text-softmint-700'}">
+                            ${u.role === 'admin' ? 'Admin' : 'Staff'}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <button onclick="openEditUserModal('${u.id}')" class="px-2 py-1 text-xs text-softsky-700 hover:bg-softsky-50 rounded-lg">แก้ไข</button>
+                        ${u.username !== 'admin' ? `<button onclick="deleteUserAccount('${u.id}')" class="px-2 py-1 text-xs text-softrose-600 hover:bg-softrose-50 rounded-lg">ลบ</button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function approveUser(userId, assignedRole) {
+            const idx = state.users.findIndex(u => u.id === userId);
+            if (idx === -1) return;
+            state.users[idx].status = 'approved';
+            state.users[idx].role = assignedRole;
+            addAuditLog(`อนุมัติบัญชีผู้ใช้ ${state.users[idx].fullName} (${state.users[idx].username}) เป็น ${assignedRole.toUpperCase()}`);
+            persistAll(true);
+            updatePendingBadge();
+            renderUsersTables();
+            renderAuditLogs();
+            showToast(`อนุมัติบัญชี ${state.users[idx].username} เรียบร้อยแล้ว`, 'success');
+        }
+
+        function rejectPendingUser(userId) {
+            const idx = state.users.findIndex(u => u.id === userId);
+            if (idx === -1) return;
+            const target = state.users[idx];
+            addAuditLog(`ปฏิเสธคำขอลงทะเบียนของ ${target.fullName} (${target.username})`);
+            state.users.splice(idx, 1);
+            persistAll(true);
+            updatePendingBadge();
+            renderUsersTables();
+            renderAuditLogs();
+            showToast('ปฏิเสธคำขอลงทะเบียนเรียบร้อยแล้ว', 'info');
+        }
+
+        function openAddUserModal() {
+            document.getElementById('user-modal-title').textContent = 'เพิ่มบัญชีผู้ใช้ใหม่';
+            document.getElementById('edit-user-id').value = '';
+            document.getElementById('user-fullname').value = '';
+            document.getElementById('user-department').value = 'สำนักดิจิทัลการแพทย์ กรมการแพทย์';
+            document.getElementById('user-username').value = '';
+            document.getElementById('user-password').value = '';
+            document.getElementById('user-role').value = 'staff';
+            const m = document.getElementById('user-modal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function openEditUserModal(userId) {
+            const u = state.users.find(item => item.id === userId);
+            if (!u) return;
+            document.getElementById('user-modal-title').textContent = 'แก้ไขบัญชีผู้ใช้';
+            document.getElementById('edit-user-id').value = u.id;
+            document.getElementById('user-fullname').value = u.fullName;
+            document.getElementById('user-department').value = u.department || '';
+            document.getElementById('user-username').value = u.username;
+            document.getElementById('user-password').value = u.password;
+            document.getElementById('user-role').value = u.role;
+            const m = document.getElementById('user-modal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function closeUserModal() {
+            const m = document.getElementById('user-modal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        function handleSaveUserModal(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-user-id').value;
+            const fullName = document.getElementById('user-fullname').value.trim();
+            const department = document.getElementById('user-department').value.trim();
+            const username = document.getElementById('user-username').value.trim();
+            const password = document.getElementById('user-password').value.trim();
+            const role = document.getElementById('user-role').value;
+
+            if (!isValidSixDigitPin(password)) {
+                showToast('รหัสผ่านต้องเป็นตัวเลข 6 หลัก', 'error');
+                return;
+            }
+
+            const duplicate = state.users.some(u => u.username.toLowerCase() === username.toLowerCase() && u.id !== id);
+            if (duplicate) {
+                showToast('Username นี้มีอยู่ในระบบแล้ว', 'error');
+                return;
+            }
+
+            if (id) {
+                const idx = state.users.findIndex(u => u.id === id);
+                if (idx !== -1) {
+                    state.users[idx] = { ...state.users[idx], fullName, department, username, password, role, status: 'approved' };
+                    addAuditLog(`แก้ไขข้อมูลบัญชีผู้ใช้ ${username}`);
+                }
+            } else {
+                state.users.push({
+                    id: 'u-' + Date.now(),
+                    fullName,
+                    department,
+                    username,
+                    password,
+                    role,
+                    status: 'approved',
+                    createdAt: new Date().toLocaleDateString('th-TH')
+                });
+                addAuditLog(`สร้างบัญชีผู้ใช้ใหม่ ${username} (${role})`);
+            }
+
+            persistAll(true);
+            renderUsersTables();
+            renderAuditLogs();
+            closeUserModal();
+            showToast('บันทึกบัญชีผู้ใช้เรียบร้อยแล้ว', 'success');
+        }
+
+        function deleteUserAccount(userId) {
+            const idx = state.users.findIndex(u => u.id === userId);
+            if (idx === -1) return;
+            const target = state.users[idx];
+            addAuditLog(`ลบบัญชีผู้ใช้ ${target.username}`);
+            state.users.splice(idx, 1);
+            persistAll(true);
+            renderUsersTables();
+            renderAuditLogs();
+            showToast('ลบบัญชีผู้ใช้เรียบร้อยแล้ว', 'info');
+        }
+
+        function openChangePasswordModal() {
+            document.getElementById('cp-username').value = currentUser ? currentUser.username : '';
+            document.getElementById('cp-old-pass').value = '';
+            document.getElementById('cp-new-pass').value = '';
+            const m = document.getElementById('change-password-modal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function closeChangePasswordModal() {
+            const m = document.getElementById('change-password-modal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        function handleChangePassword(e) {
+            e.preventDefault();
+            const username = document.getElementById('cp-username').value.trim();
+            const oldPass = document.getElementById('cp-old-pass').value.trim();
+            const newPass = document.getElementById('cp-new-pass').value.trim();
+
+            if (!isValidSixDigitPin(newPass)) {
+                showToast('รหัสผ่านใหม่ต้องเป็นตัวเลข 6 หลัก', 'error');
+                return;
+            }
+
+            const idx = state.users.findIndex(u => u.username.toLowerCase() === username.toLowerCase() && u.password === oldPass);
+            if (idx === -1) {
+                showToast('ไม่พบข้อมูลบัญชีหรือรหัสผ่านเดิมไม่ถูกต้อง', 'error');
+                return;
+            }
+
+            state.users[idx].password = newPass;
+            persistAll(true);
+            closeChangePasswordModal();
+            showToast('เปลี่ยนรหัสผ่าน 6 หลักเรียบร้อยแล้ว', 'success');
+        }
+
+        // ==================== NAVIGATION & DASHBOARD ====================
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(sec => sec.classList.add('hidden'));
+            const target = document.getElementById(`tab-${tabName}`);
+            if (target) target.classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const isActive = btn.dataset.tab === tabName;
+                btn.classList.toggle('bg-softsky-100/90', isActive);
+                btn.classList.toggle('text-softsky-800', isActive);
+                btn.classList.toggle('border', isActive);
+                btn.classList.toggle('border-softsky-200', isActive);
+                btn.classList.toggle('text-slate-600', !isActive);
+            });
+
+            if (tabName === 'users' && currentUser?.role === 'admin') {
+                renderUsersTables();
+            }
+        }
+
+        function renderDashboard() {
+            const fiscal = document.getElementById('dash-fiscal-filter').value;
+            const list = fiscal === 'ALL' ? state.projects : state.projects.filter(p => p.fiscalYear === fiscal);
+
+            const total = list.length;
+            const rejected = list.filter(p => p.rejected).length;
+            const completed = list.filter(p => !p.rejected && Number(p.currentStep) >= 5).length;
+            const inProgress = list.filter(p => !p.rejected && Number(p.currentStep) < 5).length;
+
+            document.getElementById('kpi-total').textContent = total;
+            document.getElementById('kpi-inprogress').textContent = inProgress;
+            document.getElementById('kpi-completed').textContent = completed;
+            document.getElementById('kpi-rejected').textContent = rejected;
+            document.getElementById('nav-count-badge').textContent = state.projects.length;
+
+            const stepContainer = document.getElementById('step-chart-container');
+            stepContainer.innerHTML = Object.entries(STEP_LABELS).map(([stepNum, label]) => {
+                const count = list.filter(p => !p.rejected && Number(p.currentStep) === Number(stepNum)).length;
+                const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                return `
+                    <button onclick="filterByStepFromDash('${stepNum}')" class="w-full text-left group">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="font-medium text-slate-700 group-hover:text-softsky-800">${escapeHtml(label)}</span>
+                            <span class="font-semibold text-slate-600">${count} โครงการ (${pct}%)</span>
+                        </div>
+                        <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="${STEP_BAR_COLORS[stepNum]} h-full rounded-full transition-all" style="width: ${pct}%"></div>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+
+            const urgentList = document.getElementById('urgent-projects-list');
+            const activeItems = list.filter(p => !p.rejected && Number(p.currentStep) < 6).slice(0, 4);
+            urgentList.innerHTML = activeItems.length
+                ? activeItems.map(p => `
+                    <div onclick="openProjectDetailModal('${p.id}')" class="p-2.5 rounded-xl bg-slate-50 hover:bg-softsky-50/70 border border-slate-200/70 cursor-pointer transition">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="font-mono font-bold text-softsky-800">${escapeHtml(p.regNo)}</span>
+                            <span class="px-2 py-0.5 rounded-full bg-white border border-slate-200 text-[11px] font-medium">ขั้นที่ ${p.currentStep}</span>
+                        </div>
+                        <div class="text-xs font-medium text-slate-700 truncate mt-1">${escapeHtml(p.title)}</div>
+                    </div>
+                `).join('')
+                : `<div class="text-xs text-slate-400 py-4 text-center">ไม่มีโครงการค้างดำเนินการ</div>`;
+
+            const recentLogs = document.getElementById('dashboard-recent-logs');
+            recentLogs.innerHTML = state.logs.slice(0, 3).map(l => `
+                <div class="text-xs">
+                    <div class="font-medium text-slate-700 truncate">${escapeHtml(l.action)}</div>
+                    <div class="text-[11px] text-slate-400">${escapeHtml(l.actor)} • ${escapeHtml(l.timestamp)}</div>
+                </div>
+            `).join('') || `<div class="text-xs text-slate-400">ยังไม่มีประวัติการดำเนินงาน</div>`;
+        }
+
+        function filterByStepFromDash(stepNum) {
+            document.getElementById('filter-step').value = String(stepNum);
+            switchTab('registry');
+            renderProjectTable();
+        }
+
+        // ==================== PROJECTS & DUPLICATE PREVENTION ====================
+        function generateNextRegNo(fiscalYear = '2569') {
+            const prefix = `DMS-${fiscalYear}-`;
+            let maxSeq = 0;
+            state.projects.forEach(p => {
+                if (p.regNo && p.regNo.startsWith(prefix)) {
+                    const numPart = parseInt(p.regNo.replace(prefix, ''), 10);
+                    if (!isNaN(numPart) && numPart > maxSeq) maxSeq = numPart;
+                }
+            });
+            let nextSeq = maxSeq + 1;
+            let candidate = `${prefix}${String(nextSeq).padStart(3, '0')}`;
+            while (state.projects.some(p => p.regNo.toLowerCase() === candidate.toLowerCase())) {
+                nextSeq += 1;
+                candidate = `${prefix}${String(nextSeq).padStart(3, '0')}`;
+            }
+            return candidate;
+        }
+
+        function openNewProjectModal() {
+            const fiscal = document.getElementById('new-fiscal').value || '2569';
+            document.getElementById('new-reg-no').value = generateNextRegNo(fiscal);
+            document.getElementById('new-title').value = '';
+            document.getElementById('new-dept').value = 'สำนักดิจิทัลการแพทย์ กรมการแพทย์';
+            document.getElementById('new-budget').value = '0';
+            document.getElementById('new-received-date').value = new Date().toISOString().slice(0, 10);
+            const m = document.getElementById('new-project-modal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function closeNewProjectModal() {
+            const m = document.getElementById('new-project-modal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        function handleCreateProject(e) {
+            e.preventDefault();
+            reloadFromStorageAndRender();
+
+            const regNo = document.getElementById('new-reg-no').value.trim();
+            const fiscalYear = document.getElementById('new-fiscal').value;
+            const title = document.getElementById('new-title').value.trim();
+            const department = document.getElementById('new-dept').value.trim();
+            const budget = parseFloat(document.getElementById('new-budget').value) || 0;
+            const receivedDate = document.getElementById('new-received-date').value;
+
+            if (!regNo) {
+                showToast('กรุณาระบุเลขทะเบียนรับ', 'error');
+                return;
+            }
+
+            if (state.projects.some(p => p.regNo.toLowerCase() === regNo.toLowerCase())) {
+                showToast(`เลขทะเบียนรับ "${regNo}" มีอยู่ในระบบแล้ว ห้ามซ้ำกัน`, 'error');
+                return;
+            }
+
+            const newPrj = {
+                id: 'prj-' + Date.now(),
+                regNo,
+                fiscalYear,
+                title,
+                department,
+                budget,
+                receivedDate,
+                currentStep: 1,
+                rejected: false,
+                rejectReason: '',
+                dateMeeting: '',
+                dateSign: '',
+                dateReturn: '',
+                note: ''
+            };
+
+            state.projects.unshift(newPrj);
+            addAuditLog(`ลงทะเบียนรับเรื่องโครงการใหม่ [${regNo}] ${title}`);
+            persistAll(true);
+            renderDashboard();
+            renderProjectTable();
+            renderAuditLogs();
+            closeNewProjectModal();
+            showToast('ลงทะเบียนโครงการใหม่เรียบร้อยแล้ว', 'success');
+        }
+
+        function renderProjectTable() {
+            const query = (document.getElementById('search-input')?.value || '').trim().toLowerCase();
+            const fiscal = document.getElementById('filter-fiscal')?.value || 'ALL';
+            const step = document.getElementById('filter-step')?.value || 'ALL';
+
+            const filtered = state.projects.filter(p => {
+                const matchQuery = !query ||
+                    (p.regNo || '').toLowerCase().includes(query) ||
+                    (p.title || '').toLowerCase().includes(query) ||
+                    (p.department || '').toLowerCase().includes(query);
+                const matchFiscal = fiscal === 'ALL' || p.fiscalYear === fiscal;
+                const matchStep = step === 'ALL' || Number(p.currentStep) === Number(step);
+                return matchQuery && matchFiscal && matchStep;
+            });
+
+            const tbody = document.getElementById('project-table-body');
+            if (!filtered.length) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-xs text-slate-400">ไม่พบข้อมูลโครงการตามเงื่อนไขที่เลือก</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(p => `
+                <tr class="hover:bg-slate-50/80 transition">
+                    <td class="py-3 px-4 font-mono text-xs font-bold text-softsky-800 whitespace-nowrap">${escapeHtml(p.regNo)}</td>
+                    <td class="py-3 px-4">
+                        <div class="font-semibold text-slate-800 text-sm">${escapeHtml(p.title)}</div>
+                        <div class="text-xs text-slate-500">${escapeHtml(p.department)}</div>
+                    </td>
+                    <td class="py-3 px-4 text-xs whitespace-nowrap">
+                        <div class="font-medium text-slate-700">ปี ${escapeHtml(p.fiscalYear)}</div>
+                        <div class="text-slate-500">${Number(p.budget || 0).toLocaleString('th-TH')} บาท</div>
+                    </td>
+                    <td class="py-3 px-4">
+                        ${p.rejected
+                            ? `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-softrose-100 text-softrose-600">ไม่ผ่าน / ยกเลิก</span>`
+                            : `<span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-softsky-100 text-softsky-800">${escapeHtml(STEP_LABELS[p.currentStep] || '')}</span>`
+                        }
+                    </td>
+                    <td class="py-3 px-4 text-center whitespace-nowrap">
+                        <button onclick="openProjectDetailModal('${p.id}')" class="px-3 py-1.5 bg-white hover:bg-softsky-50 text-softsky-800 border border-softsky-200 rounded-lg text-xs font-semibold">
+                            ดู / อัปเดต
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openProjectDetailModal(projectId) {
+            const p = state.projects.find(item => item.id === projectId);
+            if (!p) return;
+            activeEditingProjectId = p.id;
+
+            document.getElementById('detail-reg-no').textContent = p.regNo;
+            document.getElementById('detail-title').textContent = p.title;
+            document.getElementById('detail-dept').textContent = p.department;
+            document.getElementById('detail-budget').textContent = `${Number(p.budget || 0).toLocaleString('th-TH')} บาท`;
+
+            const isAdmin = currentUser?.role === 'admin';
+            document.getElementById('admin-deep-edit-box').classList.toggle('hidden', !isAdmin);
+            document.getElementById('delete-project-btn').classList.toggle('hidden', !isAdmin);
+
+            if (isAdmin) {
+                document.getElementById('edit-reg-no').value = p.regNo;
+                document.getElementById('edit-budget').value = p.budget || 0;
+                document.getElementById('edit-title').value = p.title;
+            }
+
+            document.getElementById('detail-current-step').value = p.rejected ? '3' : String(p.currentStep || 1);
+            document.getElementById('detail-reject-reason').value = p.rejectReason || '';
+            document.getElementById('detail-date-meeting').value = p.dateMeeting || '';
+            document.getElementById('detail-date-sign').value = p.dateSign || '';
+            document.getElementById('detail-date-return').value = p.dateReturn || '';
+            document.getElementById('detail-note').value = p.note || '';
+
+            const rejectBox = document.getElementById('reject-reason-box');
+            rejectBox.classList.toggle('hidden', !p.rejected);
+
+            const m = document.getElementById('project-detail-modal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+
+        function toggleRejectReasonBox() {
+            const stepVal = Number(document.getElementById('detail-current-step').value);
+            document.getElementById('reject-reason-box').classList.toggle('hidden', stepVal !== 3);
+        }
+
+        function closeProjectDetailModal() {
+            activeEditingProjectId = null;
+            const m = document.getElementById('project-detail-modal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        function saveProjectDetailChanges() {
+            if (!activeEditingProjectId) return;
+            const idx = state.projects.findIndex(item => item.id === activeEditingProjectId);
+            if (idx === -1) return;
+
+            const current = state.projects[idx];
+            const isAdmin = currentUser?.role === 'admin';
+
+            if (isAdmin) {
+                const newRegNo = document.getElementById('edit-reg-no').value.trim();
+                const newTitle = document.getElementById('edit-title').value.trim();
+                const newBudget = parseFloat(document.getElementById('edit-budget').value) || 0;
+
+                if (!newRegNo || !newTitle) {
+                    showToast('กรุณาระบุเลขทะเบียนรับและชื่อโครงการ', 'error');
+                    return;
+                }
+                if (state.projects.some(p => p.id !== current.id && p.regNo.toLowerCase() === newRegNo.toLowerCase())) {
+                    showToast(`เลขทะเบียนรับ "${newRegNo}" ซ้ำกับโครงการอื่น`, 'error');
+                    return;
+                }
+                current.regNo = newRegNo;
+                current.title = newTitle;
+                current.budget = newBudget;
+            }
+
+            const newStep = Number(document.getElementById('detail-current-step').value);
+            const rejectReason = document.getElementById('detail-reject-reason').value.trim();
+            current.currentStep = newStep;
+            current.rejected = (newStep === 3 && Boolean(rejectReason));
+            current.rejectReason = rejectReason;
+            current.dateMeeting = document.getElementById('detail-date-meeting').value;
+            current.dateSign = document.getElementById('detail-date-sign').value;
+            current.dateReturn = document.getElementById('detail-date-return').value;
+            current.note = document.getElementById('detail-note').value.trim();
+
+            addAuditLog(`อัปเดตสถานะโครงการ [${current.regNo}] เป็น ${STEP_LABELS[newStep]}`);
+            persistAll(true);
+            renderDashboard();
+            renderProjectTable();
+            renderAuditLogs();
+            closeProjectDetailModal();
+            showToast('บันทึกข้อมูลโครงการเรียบร้อยแล้ว', 'success');
+        }
+
+        function deleteCurrentProject() {
+            if (!activeEditingProjectId || currentUser?.role !== 'admin') return;
+            const idx = state.projects.findIndex(item => item.id === activeEditingProjectId);
+            if (idx === -1) return;
+            const target = state.projects[idx];
+            addAuditLog(`ลบโครงการ [${target.regNo}] ${target.title}`);
+            state.projects.splice(idx, 1);
+            persistAll(true);
+            renderDashboard();
+            renderProjectTable();
+            renderAuditLogs();
+            closeProjectDetailModal();
+            showToast('ลบโครงการเรียบร้อยแล้ว', 'info');
+        }
+
+        function renderAuditLogs() {
+            const container = document.getElementById('audit-log-list');
+            if (!state.logs.length) {
+                container.innerHTML = `<div class="py-6 text-center text-xs text-slate-400">ยังไม่มีประวัติการดำเนินงาน</div>`;
+                return;
+            }
+            container.innerHTML = state.logs.map(l => `
+                <div class="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs">
+                    <div>
+                        <span class="font-semibold text-slate-800">${escapeHtml(l.action)}</span>
+                        <span class="text-slate-500 ml-2">โดย ${escapeHtml(l.actor)}</span>
+                    </div>
+                    <span class="text-[11px] text-slate-400 font-mono">${escapeHtml(l.timestamp)}</span>
+                </div>
+            `).join('');
+        }
+
+        function exportToCSV() {
+            const headers = ['เลขทะเบียนรับ', 'ปีงบประมาณ', 'ชื่อโครงการ', 'หน่วยงาน', 'งบประมาณ', 'สถานะขั้นตอน', 'วันที่ประชุม', 'วันที่เสนอลงนาม', 'วันที่ส่งคืน'];
+            const rows = state.projects.map(p => [
+                p.regNo,
+                p.fiscalYear,
+                p.title,
+                p.department,
+                p.budget || 0,
+                p.rejected ? `ไม่ผ่าน/ยกเลิก (${p.rejectReason || ''})` : (STEP_LABELS[p.currentStep] || ''),
+                p.dateMeeting || '',
+                p.dateSign || '',
+                p.dateReturn || ''
+            ]);
+
+            const csvContent = '\uFEFF' + [headers, ...rows]
+                .map(r => r.map(cell => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(','))
+                .join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `DMS_Projects_${new Date().toISOString().slice(0, 10)}.csv`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('ส่งออกไฟล์ CSV เรียบร้อยแล้ว', 'success');
+        }
+
+        // Boot
+        seedInitialDataIfEmpty();
+        initFirebaseIfConfigured();
+        const savedSession = localStorage.getItem(STORAGE_KEYS.session);
+        if (savedSession) {
+            try {
+                const { userId } = JSON.parse(savedSession);
+                const found = state.users.find(u => u.id === userId && u.status === 'approved');
+                if (found) {
+                    currentUser = found;
+                    enterMainApp();
+                }
+            } catch {}
+        }
+    </script>
+</body>
+</html>
